@@ -1,4 +1,6 @@
-/* ── Layout ─────────────────────────────────── */
+/* ══════════════════════════════════════════════
+   Layout
+══════════════════════════════════════════════ */
 .app {
   display: flex;
   flex-direction: column;
@@ -6,7 +8,9 @@
   overflow: hidden;
 }
 
-/* ── Header ─────────────────────────────────── */
+/* ══════════════════════════════════════════════
+   Header
+══════════════════════════════════════════════ */
 .header {
   display: flex;
   align-items: center;
@@ -17,67 +21,80 @@
   color: #f8fafc;
   flex-shrink: 0;
   border-bottom: 1px solid #334155;
+  z-index: 10;
 }
 .header-logo {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.header-icon {
-  font-size: 20px;
-  line-height: 1;
-}
+.header-icon { font-size: 20px; line-height: 1; }
 .header h1 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #f8fafc;
+  white-space: nowrap;
 }
 .header-sub {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-left: 4px;
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ── Workspace ───────────────────────────────── */
+/* ══════════════════════════════════════════════
+   Workspace
+══════════════════════════════════════════════ */
 .workspace {
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
-/* ── Left Control Panel ──────────────────────── */
+/* ══════════════════════════════════════════════
+   Mobile Tab Bar (hidden on desktop)
+══════════════════════════════════════════════ */
+.mobile-tabs {
+  display: none;
+}
+
+/* ══════════════════════════════════════════════
+   Left Control Panel
+══════════════════════════════════════════════ */
 .control-panel {
-  width: 300px;
+  width: 304px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
-.control-panel::-webkit-scrollbar {
-  width: 4px;
-}
+.control-panel::-webkit-scrollbar { width: 4px; }
 .control-panel::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 2px;
 }
 
+/* ── Panel Section ── */
 .panel-section {
   padding: 14px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex-shrink: 0;
 }
 .panel-section h2 {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #64748b;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
 }
 .section-header {
   display: flex;
@@ -85,7 +102,73 @@
   justify-content: space-between;
 }
 
-/* ── Form Controls ───────────────────────────── */
+/* ══════════════════════════════════════════════
+   Template Gallery
+══════════════════════════════════════════════ */
+.tmpl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tmpl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 7px;
+  padding: 3px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.tmpl-card:hover {
+  border-color: #a5b4fc;
+  transform: translateY(-1px);
+}
+.tmpl-card.active {
+  border-color: #6366f1;
+}
+.tmpl-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+}
+.tmpl-line {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  border-radius: 2px;
+}
+.tmpl-line-title {
+  top: 32%;
+  height: 14%;
+  width: 72%;
+  left: 8%;
+  right: auto;
+}
+.tmpl-line-sub {
+  top: 58%;
+  height: 9%;
+  width: 50%;
+  left: 8%;
+  right: auto;
+}
+.tmpl-name {
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+/* ══════════════════════════════════════════════
+   Form Controls
+══════════════════════════════════════════════ */
 .control-row {
   display: flex;
   align-items: center;
@@ -96,7 +179,7 @@
 .control-col label {
   font-size: 12px;
   color: #475569;
-  min-width: 52px;
+  min-width: 46px;
   flex-shrink: 0;
 }
 .control-col {
@@ -112,51 +195,44 @@
   font-size: 12px;
   font-family: inherit;
   background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   color: #1e293b;
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s;
-}
-.select:focus {
-  border-color: #6366f1;
-}
-.select-sm {
-  flex: 1;
   min-width: 0;
 }
+.select:focus { border-color: #6366f1; }
 
 .textarea {
   width: 100%;
-  padding: 6px 8px;
+  padding: 7px 9px;
   font-size: 13px;
   font-family: inherit;
   background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   color: #1e293b;
   resize: vertical;
   outline: none;
-  transition: border-color 0.15s;
   line-height: 1.5;
+  transition: border-color 0.15s;
 }
-.textarea:focus {
-  border-color: #6366f1;
-}
+.textarea:focus { border-color: #6366f1; }
 
 .range {
   flex: 1;
   height: 4px;
   accent-color: #6366f1;
   cursor: pointer;
-  min-width: 80px;
+  min-width: 60px;
 }
 
 .color-input {
   width: 30px;
   height: 28px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   padding: 2px;
   cursor: pointer;
@@ -165,18 +241,36 @@
 }
 .color-value {
   font-size: 11px;
-  color: #64748b;
+  color: #94a3b8;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
 }
 .value-badge {
   font-size: 11px;
   color: #6366f1;
-  font-weight: 600;
-  min-width: 34px;
+  font-weight: 700;
+  min-width: 36px;
   text-align: right;
 }
 
-/* ── Buttons ─────────────────────────────────── */
+.gradient-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.bg-type-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* ══════════════════════════════════════════════
+   Buttons
+══════════════════════════════════════════════ */
 .btn-small {
   height: 26px;
   padding: 0 10px;
@@ -186,24 +280,15 @@
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s;
   line-height: 1;
   white-space: nowrap;
+  flex-shrink: 0;
 }
-.btn-primary {
-  background: #6366f1;
-  color: #fff;
-}
-.btn-primary:hover {
-  background: #4f46e5;
-}
-.btn-danger {
-  background: #fee2e2;
-  color: #dc2626;
-}
-.btn-danger:hover {
-  background: #fecaca;
-}
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-danger  { background: #fee2e2; color: #dc2626; }
+.btn-danger:hover  { background: #fecaca; }
 
 .btn-icon {
   width: 22px;
@@ -223,26 +308,25 @@
 
 .btn-toggle {
   height: 28px;
-  min-width: 28px;
-  padding: 0 8px;
+  min-width: 32px;
+  padding: 0 10px;
   font-size: 12px;
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 600;
   border: 1px solid #e2e8f0;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #f8fafc;
   color: #475569;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 .btn-toggle.active {
   background: #6366f1;
   border-color: #6366f1;
   color: #fff;
 }
-.btn-toggle:hover:not(.active) {
-  background: #e2e8f0;
-}
+.btn-toggle:hover:not(.active) { background: #f1f5f9; }
 
 .file-upload-btn {
   display: inline-flex;
@@ -252,40 +336,36 @@
   font-size: 11px;
   font-weight: 600;
   background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   color: #475569;
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
 }
-.file-upload-btn:hover {
-  background: #e2e8f0;
-}
+.file-upload-btn:hover { background: #e2e8f0; }
 
 .btn-download {
   width: 100%;
-  height: 42px;
+  height: 44px;
   font-size: 14px;
   font-family: inherit;
   font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: #fff;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
 }
-.btn-download:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-}
-.btn-download:active {
-  transform: translateY(0);
-}
+.btn-download:hover  { opacity: 0.92; transform: translateY(-1px); }
+.btn-download:active { transform: translateY(0); }
 
-/* ── Text List ───────────────────────────────── */
+/* ══════════════════════════════════════════════
+   Text List
+══════════════════════════════════════════════ */
 .text-list {
   display: flex;
   flex-direction: column;
@@ -296,21 +376,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 7px 10px;
+  border-radius: 7px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   cursor: pointer;
   transition: all 0.15s;
 }
-.text-item:hover {
-  border-color: #a5b4fc;
-  background: #eef2ff;
-}
-.text-item.selected {
-  border-color: #6366f1;
-  background: #eef2ff;
-}
+.text-item:hover    { border-color: #a5b4fc; background: #eef2ff; }
+.text-item.selected { border-color: #6366f1; background: #eef2ff; }
 .text-preview {
   font-size: 12px;
   color: #334155;
@@ -320,7 +394,20 @@
   white-space: nowrap;
 }
 
-/* ── Preview Area ────────────────────────────── */
+/* ══════════════════════════════════════════════
+   Download section extras
+══════════════════════════════════════════════ */
+.preset-badge {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* ══════════════════════════════════════════════
+   Preview Area
+══════════════════════════════════════════════ */
 .preview-area {
   flex: 1;
   display: flex;
@@ -328,21 +415,116 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #f1f5f9;
+  background: #e8edf5;
+  background-image:
+    radial-gradient(circle, #c8d3e0 1px, transparent 1px);
+  background-size: 20px 20px;
   overflow: hidden;
   gap: 12px;
 }
-
 .canvas-wrapper {
   border-radius: 4px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.08),
+    0 8px 32px rgba(0,0,0,0.16),
+    0 0 0 1px rgba(0,0,0,0.05);
   overflow: hidden;
   background: #fff;
   flex-shrink: 0;
 }
-
 .canvas-hint {
   font-size: 11px;
   color: #94a3b8;
   text-align: center;
+}
+
+/* ══════════════════════════════════════════════
+   Responsive — Tablet (768px ~ 1023px)
+══════════════════════════════════════════════ */
+@media (max-width: 1023px) {
+  .control-panel { width: 256px; }
+  .header-sub    { display: none; }
+}
+
+/* ══════════════════════════════════════════════
+   Responsive — Mobile (< 768px)
+══════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .app { height: 100dvh; }
+
+  /* Tab bar */
+  .mobile-tabs {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    z-index: 20;
+  }
+  .mobile-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    padding: 0;
+    color: #94a3b8;
+    font-family: inherit;
+  }
+  .mobile-tab.active {
+    color: #6366f1;
+    background: #eef2ff;
+  }
+  .mobile-tab-icon  { font-size: 18px; line-height: 1; }
+  .mobile-tab-label { font-size: 10px; font-weight: 600; }
+
+  /* Layout */
+  .workspace {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Canvas area */
+  .preview-area {
+    flex: none;
+    height: calc(100dvh - 52px - 56px - 200px);
+    min-height: 160px;
+    padding: 12px;
+  }
+  .canvas-hint { display: none; }
+
+  /* Control panel becomes bottom sheet */
+  .control-panel {
+    width: 100%;
+    flex: none;
+    height: 200px;
+    border-right: none;
+    border-top: 1px solid #e2e8f0;
+    overflow-y: auto;
+    margin-bottom: 56px; /* tab bar height */
+  }
+
+  /* Show only active tab's sections on mobile */
+  .control-panel[data-tab="template"] .panel-section:not(.s-template),
+  .control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
+  .control-panel[data-tab="text"]     .panel-section:not(.s-text),
+  .control-panel[data-tab="export"]   .panel-section:not(.s-export) {
+    display: none;
+  }
+
+  /* Template grid – smaller on mobile */
+  .tmpl-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .btn-download { height: 40px; font-size: 13px; }
 }

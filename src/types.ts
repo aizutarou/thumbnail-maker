@@ -1,0 +1,53 @@
+export type Align = 'left' | 'center' | 'right'
+export type GradientAngle = 'to-right' | 'to-bottom' | 'to-bottom-right' | 'to-bottom-left'
+export type MobileTab = 'template' | 'bg' | 'text' | 'export'
+
+export interface TextItem {
+  id: string
+  text: string
+  x: number
+  y: number
+  fontSize: number
+  color: string
+  fontFamily: string
+  bold: boolean
+  italic: boolean
+  align: Align
+  width: number
+}
+
+export interface SizePreset {
+  id: string
+  name: string
+  width: number
+  height: number
+}
+
+export interface BGGradient {
+  from: string
+  to: string
+  angle: GradientAngle
+}
+
+export interface TemplateTextDef {
+  text: string
+  xRatio: number
+  yRatio: number
+  fontSizeRatio: number
+  color: string
+  fontFamily: string
+  bold: boolean
+  italic: boolean
+  align: Align
+  widthRatio: number
+}
+
+export interface TemplateDef {
+  id: string
+  name: string
+  category: string
+  bgColor: string
+  bgGradient?: BGGradient
+  thumbStyle: string
+  texts: TemplateTextDef[]
+}
