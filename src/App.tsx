@@ -50,6 +50,13 @@ function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextIt
     italic: false,
     align: 'left',
     width: preset.width - 120,
+    shadowEnabled: false,
+    shadowColor: '#000000',
+    shadowBlur: 10,
+    shadowOffsetX: 3,
+    shadowOffsetY: 3,
+    outlineWidth: 0,
+    outlineColor: '#000000',
     ...overrides,
   }
 }
@@ -467,6 +474,59 @@ export default function App() {
                   </button>
                 ))}
               </div>
+
+              {/* Shadow */}
+              <div className="control-row">
+                <label>影</label>
+                <button
+                  className={`btn-toggle ${selectedText.shadowEnabled ? 'active' : ''}`}
+                  onClick={() => updateText(selectedText.id, { shadowEnabled: !selectedText.shadowEnabled })}
+                >
+                  {selectedText.shadowEnabled ? 'ON' : 'OFF'}
+                </button>
+                {selectedText.shadowEnabled && (
+                  <input
+                    type="color"
+                    className="color-input"
+                    value={selectedText.shadowColor}
+                    onChange={e => updateText(selectedText.id, { shadowColor: e.target.value })}
+                    title="影の色"
+                  />
+                )}
+              </div>
+              {selectedText.shadowEnabled && (
+                <div className="control-row">
+                  <label>影強度</label>
+                  <input
+                    type="range"
+                    className="range"
+                    min={0} max={40}
+                    value={selectedText.shadowBlur}
+                    onChange={e => updateText(selectedText.id, { shadowBlur: Number(e.target.value) })}
+                  />
+                  <span className="value-badge">{selectedText.shadowBlur}</span>
+                </div>
+              )}
+
+              {/* Outline */}
+              <div className="control-row">
+                <label>縁取り</label>
+                <input
+                  type="color"
+                  className="color-input"
+                  value={selectedText.outlineColor}
+                  onChange={e => updateText(selectedText.id, { outlineColor: e.target.value })}
+                  title="縁取りの色"
+                />
+                <input
+                  type="range"
+                  className="range"
+                  min={0} max={20}
+                  value={selectedText.outlineWidth}
+                  onChange={e => updateText(selectedText.id, { outlineWidth: Number(e.target.value) })}
+                />
+                <span className="value-badge">{selectedText.outlineWidth}px</span>
+              </div>
             </section>
           )}
 
@@ -519,9 +579,15 @@ export default function App() {
                     onClick={() => setSelectedId(t.id)}
                     onTap={() => setSelectedId(t.id)}
                     onDragEnd={e => updateText(t.id, { x: e.target.x(), y: e.target.y() })}
-                    shadowColor={selectedId === t.id ? '#6366f1' : 'transparent'}
-                    shadowBlur={selectedId === t.id ? 14 / scale : 0}
-                    shadowOpacity={selectedId === t.id ? 0.9 : 0}
+                    shadowEnabled={t.shadowEnabled || selectedId === t.id}
+                    shadowColor={t.shadowEnabled ? t.shadowColor : '#6366f1'}
+                    shadowBlur={t.shadowEnabled ? t.shadowBlur : (selectedId === t.id ? 14 / scale : 0)}
+                    shadowOffsetX={t.shadowEnabled ? t.shadowOffsetX : 0}
+                    shadowOffsetY={t.shadowEnabled ? t.shadowOffsetY : 0}
+                    shadowOpacity={t.shadowEnabled ? 0.85 : (selectedId === t.id ? 0.9 : 0)}
+                    stroke={t.outlineWidth > 0 ? t.outlineColor : undefined}
+                    strokeWidth={t.outlineWidth > 0 ? t.outlineWidth : 0}
+                    fillAfterStrokeEnabled={t.outlineWidth > 0}
                   />
                 ))}
               </Layer>

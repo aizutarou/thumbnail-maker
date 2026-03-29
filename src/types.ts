@@ -14,6 +14,15 @@ export interface TextItem {
   italic: boolean
   align: Align
   width: number
+  // Shadow
+  shadowEnabled: boolean
+  shadowColor: string
+  shadowBlur: number
+  shadowOffsetX: number
+  shadowOffsetY: number
+  // Outline (stroke)
+  outlineWidth: number
+  outlineColor: string
 }
 
 export interface SizePreset {

@@ -167,6 +167,13 @@ export function applyTemplate(
     italic: def.italic,
     align: def.align,
     width: Math.round(def.widthRatio * preset.width),
+    shadowEnabled: false,
+    shadowColor: '#000000',
+    shadowBlur: 10,
+    shadowOffsetX: 3,
+    shadowOffsetY: 3,
+    outlineWidth: 0,
+    outlineColor: '#000000',
   }))
   return {
     bgColor: template.bgColor,
