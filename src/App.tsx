@@ -149,6 +149,14 @@ export default function App() {
     e.target.value = ''
   }
 
+  // ── Share on X ──
+  const handleShare = () => {
+    const text = encodeURIComponent('サムネイルメーカーで画像を作りました！登録不要・無料で使えます🖼')
+    const url  = encodeURIComponent('https://thumbnail-maker.aizutarou1008.workers.dev')
+    const tags = encodeURIComponent('サムネイルメーカー,無料ツール')
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${tags}`, '_blank', 'noopener')
+  }
+
   // ── PNG Download ──
   const handleDownload = () => {
     if (!stageRef.current) return
@@ -530,13 +538,16 @@ export default function App() {
             </section>
           )}
 
-          {/* Download */}
+          {/* Download & Share */}
           <section className="panel-section s-export">
             <div className="preset-badge">
               {preset.width} × {preset.height} px
             </div>
             <button className="btn-download" onClick={handleDownload}>
               ⬇ PNG でダウンロード
+            </button>
+            <button className="btn-share" onClick={handleShare}>
+              𝕏 でシェアする
             </button>
           </section>
 
