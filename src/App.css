@@ -478,14 +478,40 @@
 @media (max-width: 767px) {
   .app { height: 100dvh; }
 
-  /* Tab bar */
+  /* Workspace: vertical stack */
+  .workspace {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Reorder elements: canvas → controls → tabs */
+  .preview-area  { order: 1; }
+  .control-panel { order: 2; }
+  .mobile-tabs   { order: 3; }
+
+  /* Canvas area — 40% of remaining height */
+  .preview-area {
+    flex: 0 0 40%;
+    min-height: 120px;
+    padding: 10px;
+  }
+  .canvas-hint { display: none; }
+
+  /* Control panel — fills remaining space, scrollable */
+  .control-panel {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    border-right: none;
+    border-top: 1px solid #e2e8f0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tab bar — in normal flow at bottom */
   .mobile-tabs {
     display: flex;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
+    flex: 0 0 56px;
     background: #ffffff;
     border-top: 1px solid #e2e8f0;
     z-index: 20;
@@ -496,7 +522,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
     border: none;
     background: none;
     cursor: pointer;
@@ -504,41 +530,17 @@
     padding: 0;
     color: #94a3b8;
     font-family: inherit;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
   }
   .mobile-tab.active {
     color: #6366f1;
     background: #eef2ff;
   }
-  .mobile-tab-icon  { font-size: 18px; line-height: 1; }
+  .mobile-tab-icon  { font-size: 20px; line-height: 1; }
   .mobile-tab-label { font-size: 10px; font-weight: 600; }
 
-  /* Layout */
-  .workspace {
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Canvas area */
-  .preview-area {
-    flex: none;
-    height: calc(100dvh - 52px - 56px - 200px);
-    min-height: 160px;
-    padding: 12px;
-  }
-  .canvas-hint { display: none; }
-
-  /* Control panel becomes bottom sheet */
-  .control-panel {
-    width: 100%;
-    flex: none;
-    height: 200px;
-    border-right: none;
-    border-top: 1px solid #e2e8f0;
-    overflow-y: auto;
-    margin-bottom: 56px; /* tab bar height */
-  }
-
-  /* Show only active tab's sections on mobile */
+  /* Show only active tab's sections */
   .control-panel[data-tab="template"] .panel-section:not(.s-template),
   .control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
   .control-panel[data-tab="text"]     .panel-section:not(.s-text),
@@ -546,11 +548,22 @@
     display: none;
   }
 
-  /* Template grid – smaller on mobile */
+  /* Template grid — 3 columns, bigger thumbnails */
   .tmpl-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
   }
 
-  .btn-download { height: 40px; font-size: 13px; }
+  /* Touch targets — 44px minimum (Apple HIG) */
+  .btn-small       { min-height: 36px; font-size: 12px; }
+  .btn-toggle      { min-height: 36px; }
+  .file-upload-btn { min-height: 36px; }
+  .select          { height: 36px; font-size: 13px; }
+  .color-input     { width: 36px; height: 36px; }
+  .btn-download    { height: 48px; font-size: 15px; }
+  .range           { height: 6px; }
+
+  /* Panel spacing */
+  .panel-section { padding: 12px 14px; gap: 10px; }
+  .control-row   { gap: 10px; }
 }
