@@ -531,6 +531,14 @@ export default function App() {
         </main>
 
       </div>
+
+      {/* ── Footer ── */}
+      <footer className="app-footer">
+        <a href="/privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>
+        <span className="footer-sep">|</span>
+        <span>&copy; 2026 サムネイルメーカー</span>
+      </footer>
+
     </div>
   )
 }

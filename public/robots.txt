@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thumbnail-maker.aizutarou1008.workers.dev/sitemap.xml

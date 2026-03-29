@@ -1,0 +1,44 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Decorative accent bar -->
+  <rect x="80" y="180" width="8" height="120" rx="4" fill="url(#accent)" />
+
+  <!-- Main title -->
+  <text x="112" y="260" font-family="'Noto Sans JP', 'Hiragino Sans', sans-serif"
+        font-size="72" font-weight="700" fill="#ffffff" letter-spacing="2">
+    ╡р═дыс№л№
+  </text>
+
+  <!-- Subtitle -->
+  <text x="112" y="330" font-family="'Noto Sans JP', 'Hiragino Sans', sans-serif"
+        font-size="34" font-weight="400" fill="#a5b4fc">
+    OGP√YouTube√X ■▄n!Щ;╧\─№ы
+  </text>
+
+  <!-- Tags -->
+  <rect x="112" y="375" width="148" height="40" rx="20" fill="#6366f1" fill-opacity="0.3" />
+  <text x="186" y="401" font-family="sans-serif" font-size="22" fill="#c7d2fe" text-anchor="middle">{2Б</text>
+
+  <rect x="272" y="375" width="120" height="40" rx="20" fill="#6366f1" fill-opacity="0.3" />
+  <text x="332" y="401" font-family="sans-serif" font-size="22" fill="#c7d2fe" text-anchor="middle">Мh!Щ</text>
+
+  <rect x="404" y="375" width="168" height="40" rx="20" fill="#6366f1" fill-opacity="0.3" />
+  <text x="488" y="401" font-family="sans-serif" font-size="22" fill="#c7d2fe" text-anchor="middle">х,Юy</text>
+
+  <!-- Decorative shapes -->
+  <circle cx="1050" cy="180" r="140" fill="#6366f1" fill-opacity="0.08" />
+  <circle cx="1100" cy="480" r="100" fill="#8b5cf6" fill-opacity="0.08" />
+</svg>

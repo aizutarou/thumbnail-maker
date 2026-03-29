@@ -439,6 +439,32 @@
 }
 
 /* ══════════════════════════════════════════════
+   Footer
+══════════════════════════════════════════════ */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 36px;
+  font-size: 11px;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.app-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+.app-footer a:hover { color: #6366f1; }
+.footer-sep { color: #e2e8f0; }
+
+@media (max-width: 767px) {
+  .app-footer { display: none; }
+}
+
+/* ══════════════════════════════════════════════
    Responsive — Tablet (768px ~ 1023px)
 ══════════════════════════════════════════════ */
 @media (max-width: 1023px) {
