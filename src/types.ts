@@ -51,6 +51,13 @@ export interface TemplateTextDef {
   widthRatio: number
 }
 
+export interface HistorySnapshot {
+  texts: TextItem[]
+  bgColor: string
+  bgGradient: BGGradient | null
+  bgImageUrl: string | null
+}
+
 export interface TemplateDef {
   id: string
   name: string

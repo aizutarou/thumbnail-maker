@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import Konva from 'konva'
 import { Stage, Layer, Rect, Text, Image as KonvaImage } from 'react-konva'
 import { TEMPLATES, applyTemplate, getGradientPoints } from './templates'
-import type { TextItem, SizePreset, BGGradient, Align, MobileTab, GradientAngle } from './types'
+import type { TextItem, SizePreset, BGGradient, Align, MobileTab, GradientAngle, HistorySnapshot } from './types'
 import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -70,6 +70,7 @@ export default function App() {
   const [bgColor,    setBgColor]    = useState('#1a1a2e')
   const [bgGradient, setBgGradient] = useState<BGGradient | null>(null)
   const [bgImage,    setBgImage]    = useState<HTMLImageElement | null>(null)
+  const [bgImageUrl, setBgImageUrl] = useState<string | null>(null)
   const [scale,      setScale]      = useState(0.5)
   const [mobileTab,  setMobileTab]  = useState<MobileTab>('template')
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null)
@@ -79,6 +80,71 @@ export default function App() {
     return result.texts
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  // ── History (Undo / Redo) ──
+  const MAX_HISTORY = 40
+  const [historyPast,   setHistoryPast]   = useState<HistorySnapshot[]>([])
+  const [historyFuture, setHistoryFuture] = useState<HistorySnapshot[]>([])
+  const canUndo = historyPast.length > 0
+  const canRedo = historyFuture.length > 0
+
+  const captureSnapshot = useCallback((): HistorySnapshot => ({
+    texts: JSON.parse(JSON.stringify(texts)),
+    bgColor,
+    bgGradient: bgGradient ? { ...bgGradient } : null,
+    bgImageUrl,
+  }), [texts, bgColor, bgGradient, bgImageUrl])
+
+  const recordHistory = useCallback(() => {
+    const snap = captureSnapshot()
+    setHistoryPast(p => [...p.slice(-(MAX_HISTORY - 1)), snap])
+    setHistoryFuture([])
+  }, [captureSnapshot])
+
+  const restoreSnapshot = (snap: HistorySnapshot) => {
+    setTexts(snap.texts)
+    setBgColor(snap.bgColor)
+    setBgGradient(snap.bgGradient)
+    setBgImageUrl(snap.bgImageUrl)
+  }
+
+  const handleUndo = useCallback(() => {
+    if (historyPast.length === 0) return
+    const prev = historyPast[historyPast.length - 1]
+    const cur  = captureSnapshot()
+    setHistoryPast(p => p.slice(0, -1))
+    setHistoryFuture(f => [cur, ...f])
+    restoreSnapshot(prev)
+  }, [historyPast, captureSnapshot])
+
+  const handleRedo = useCallback(() => {
+    if (historyFuture.length === 0) return
+    const next = historyFuture[0]
+    const cur  = captureSnapshot()
+    setHistoryFuture(f => f.slice(1))
+    setHistoryPast(p => [...p, cur])
+    restoreSnapshot(next)
+  }, [historyFuture, captureSnapshot])
+
+  // ── bgImageUrl → HTMLImageElement ──
+  useEffect(() => {
+    if (!bgImageUrl) { setBgImage(null); return }
+    const img = new window.Image()
+    img.onload = () => setBgImage(img)
+    img.src = bgImageUrl
+  }, [bgImageUrl])
+
+  // ── Keyboard shortcuts: Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z ──
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (!mod) return
+      if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); handleUndo() }
+      if ((e.key === 'z' && e.shiftKey) || e.key === 'y') { e.preventDefault(); handleRedo() }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [handleUndo, handleRedo])
 
   // ── Scale canvas to fit container ──
   const updateScale = useCallback(() => {
@@ -98,35 +164,41 @@ export default function App() {
   const selectedText = texts.find(t => t.id === selectedId) ?? null
 
   // ── Text helpers ──
-  const updateText = (id: string, patch: Partial<TextItem>) =>
+  const updateText = (id: string, patch: Partial<TextItem>) => {
+    recordHistory()
     setTexts(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t))
+  }
 
   const addText = () => {
+    recordHistory()
     const item = makeText(preset, { y: 80 + texts.length * 90 })
     setTexts(prev => [...prev, item])
     setSelectedId(item.id)
   }
 
   const removeText = (id: string) => {
+    recordHistory()
     setTexts(prev => prev.filter(t => t.id !== id))
     if (selectedId === id) setSelectedId(null)
   }
 
   // ── Preset change ──
   const handlePresetChange = (id: string) => {
+    recordHistory()
     const next = SIZE_PRESETS.find(p => p.id === id)!
     setPreset(next)
-    setBgImage(null)
+    setBgImageUrl(null)
     setTexts(prev => prev.map(t => ({ ...t, width: next.width - 120 })))
   }
 
   // ── Template apply ──
   const handleApplyTemplate = (templateId: string) => {
+    recordHistory()
     const tmpl = TEMPLATES.find(t => t.id === templateId)!
     const result = applyTemplate(tmpl, preset)
     setBgColor(result.bgColor)
     setBgGradient(result.bgGradient)
-    setBgImage(null)
+    setBgImageUrl(null)
     setTexts(result.texts)
     setSelectedId(null)
     setActiveTemplate(templateId)
@@ -138,12 +210,9 @@ export default function App() {
     if (!file) return
     const reader = new FileReader()
     reader.onload = ev => {
-      const img = new window.Image()
-      img.onload = () => {
-        setBgImage(img)
-        setBgGradient(null)
-      }
-      img.src = ev.target?.result as string
+      recordHistory()
+      setBgImageUrl(ev.target?.result as string)
+      setBgGradient(null)
     }
     reader.readAsDataURL(file)
     e.target.value = ''
@@ -220,6 +289,20 @@ export default function App() {
           <h1>サムネイルメーカー</h1>
         </div>
         <p className="header-sub">OGP・YouTube・X対応の無料画像作成ツール — 登録不要</p>
+        <div className="header-actions">
+          <button
+            className="btn-undoredo"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="元に戻す (⌘Z)"
+          >↩</button>
+          <button
+            className="btn-undoredo"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="やり直す (⌘⇧Z)"
+          >↪</button>
+        </div>
       </header>
 
       <div className="workspace">
@@ -301,7 +384,7 @@ export default function App() {
                   className={`btn-toggle ${!!bgGradient ? 'active' : ''}`}
                   onClick={() => {
                     if (!bgGradient) setBgGradient({ from: bgColor, to: '#7c3aed', angle: 'to-bottom-right' })
-                    setBgImage(null)
+                    setBgImageUrl(null)
                   }}
                 >グラデーション</button>
               </div>
@@ -372,7 +455,7 @@ export default function App() {
                 />
               </label>
               {bgImage && (
-                <button className="btn-small btn-danger" onClick={() => setBgImage(null)}>
+                <button className="btn-small btn-danger" onClick={() => { recordHistory(); setBgImageUrl(null) }}>
                   削除
                 </button>
               )}
