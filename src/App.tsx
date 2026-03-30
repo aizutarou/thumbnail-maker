@@ -208,8 +208,6 @@ export default function App() {
   }, [updateScale])
 
   // ── Derived ──
-  const selectedText = texts.find(t => t.id === selectedId) ?? null
-
   // ── Text helpers ──
   const updateText = (id: string, patch: Partial<TextItem>) => {
     recordHistory()
@@ -522,7 +520,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* Text List */}
+          {/* Text Accordion */}
           <section className="panel-section s-text">
             <div className="section-header">
               <h2>テキスト</h2>
@@ -530,156 +528,156 @@ export default function App() {
             </div>
             <div className="text-list">
               {texts.map(t => (
-                <div
-                  key={t.id}
-                  className={`text-item ${selectedId === t.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedId(t.id)}
-                >
-                  <span className="text-preview">
-                    {t.text.slice(0, 16)}{t.text.length > 16 ? '…' : ''}
-                  </span>
-                  <button
-                    className="btn-icon btn-danger"
-                    title="削除"
-                    onClick={e => { e.stopPropagation(); removeText(t.id) }}
-                  >✕</button>
+                <div key={t.id} className={`text-accordion ${selectedId === t.id ? 'open' : ''}`}>
+
+                  {/* ── Header row (always visible) ── */}
+                  <div
+                    className="text-accordion-header"
+                    onClick={() => setSelectedId(selectedId === t.id ? null : t.id)}
+                  >
+                    <span className="accordion-arrow">{selectedId === t.id ? '▼' : '▶'}</span>
+                    <span className="text-preview">
+                      {t.text.slice(0, 15)}{t.text.length > 15 ? '…' : ''}
+                    </span>
+                    <button
+                      className="btn-icon btn-danger"
+                      title="削除"
+                      onClick={e => { e.stopPropagation(); removeText(t.id) }}
+                    >✕</button>
+                  </div>
+
+                  {/* ── Editing controls (visible when open) ── */}
+                  {selectedId === t.id && (
+                    <div className="text-accordion-body">
+
+                      <div className="control-col">
+                        <label>テキスト内容</label>
+                        <textarea
+                          className="textarea"
+                          rows={3}
+                          value={t.text}
+                          onChange={e => updateText(t.id, { text: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="control-row">
+                        <label>フォント</label>
+                        <select
+                          className="select select-sm"
+                          value={t.fontFamily}
+                          onChange={e => updateText(t.id, { fontFamily: e.target.value })}
+                        >
+                          {FONT_FAMILIES.map(f => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="control-row">
+                        <label>サイズ</label>
+                        <input
+                          type="range"
+                          className="range"
+                          min={12} max={200}
+                          value={t.fontSize}
+                          onChange={e => updateText(t.id, { fontSize: Number(e.target.value) })}
+                        />
+                        <span className="value-badge">{t.fontSize}px</span>
+                      </div>
+
+                      <div className="control-row">
+                        <label>色</label>
+                        <input
+                          type="color"
+                          className="color-input"
+                          value={t.color}
+                          onChange={e => updateText(t.id, { color: e.target.value })}
+                        />
+                        <span className="color-value">{t.color}</span>
+                      </div>
+
+                      <div className="control-row">
+                        <label>スタイル</label>
+                        <button
+                          className={`btn-toggle ${t.bold ? 'active' : ''}`}
+                          style={{ fontWeight: 700 }}
+                          onClick={() => updateText(t.id, { bold: !t.bold })}
+                        >B</button>
+                        <button
+                          className={`btn-toggle ${t.italic ? 'active' : ''}`}
+                          style={{ fontStyle: 'italic' }}
+                          onClick={() => updateText(t.id, { italic: !t.italic })}
+                        >I</button>
+                      </div>
+
+                      <div className="control-row">
+                        <label>揃え</label>
+                        {(['left', 'center', 'right'] as Align[]).map(a => (
+                          <button
+                            key={a}
+                            className={`btn-toggle ${t.align === a ? 'active' : ''}`}
+                            onClick={() => updateText(t.id, { align: a })}
+                          >
+                            {a === 'left' ? '左' : a === 'center' ? '中' : '右'}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="control-row">
+                        <label>影</label>
+                        <button
+                          className={`btn-toggle ${t.shadowEnabled ? 'active' : ''}`}
+                          onClick={() => updateText(t.id, { shadowEnabled: !t.shadowEnabled })}
+                        >{t.shadowEnabled ? 'ON' : 'OFF'}</button>
+                        {t.shadowEnabled && (
+                          <input
+                            type="color"
+                            className="color-input"
+                            value={t.shadowColor}
+                            onChange={e => updateText(t.id, { shadowColor: e.target.value })}
+                            title="影の色"
+                          />
+                        )}
+                      </div>
+                      {t.shadowEnabled && (
+                        <div className="control-row">
+                          <label>影強度</label>
+                          <input
+                            type="range"
+                            className="range"
+                            min={0} max={40}
+                            value={t.shadowBlur}
+                            onChange={e => updateText(t.id, { shadowBlur: Number(e.target.value) })}
+                          />
+                          <span className="value-badge">{t.shadowBlur}</span>
+                        </div>
+                      )}
+
+                      <div className="control-row">
+                        <label>縁取り</label>
+                        <input
+                          type="color"
+                          className="color-input"
+                          value={t.outlineColor}
+                          onChange={e => updateText(t.id, { outlineColor: e.target.value })}
+                          title="縁取りの色"
+                        />
+                        <input
+                          type="range"
+                          className="range"
+                          min={0} max={20}
+                          value={t.outlineWidth}
+                          onChange={e => updateText(t.id, { outlineWidth: Number(e.target.value) })}
+                        />
+                        <span className="value-badge">{t.outlineWidth}px</span>
+                      </div>
+
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </section>
-
-          {/* Text Editor */}
-          {selectedText && (
-            <section className="panel-section s-text">
-              <h2>テキスト編集</h2>
-
-              <div className="control-col">
-                <label>テキスト内容</label>
-                <textarea
-                  className="textarea"
-                  rows={3}
-                  value={selectedText.text}
-                  onChange={e => updateText(selectedText.id, { text: e.target.value })}
-                />
-              </div>
-
-              <div className="control-row">
-                <label>フォント</label>
-                <select
-                  className="select select-sm"
-                  value={selectedText.fontFamily}
-                  onChange={e => updateText(selectedText.id, { fontFamily: e.target.value })}
-                >
-                  {FONT_FAMILIES.map(f => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="control-row">
-                <label>サイズ</label>
-                <input
-                  type="range"
-                  className="range"
-                  min={12} max={200}
-                  value={selectedText.fontSize}
-                  onChange={e => updateText(selectedText.id, { fontSize: Number(e.target.value) })}
-                />
-                <span className="value-badge">{selectedText.fontSize}px</span>
-              </div>
-
-              <div className="control-row">
-                <label>色</label>
-                <input
-                  type="color"
-                  className="color-input"
-                  value={selectedText.color}
-                  onChange={e => updateText(selectedText.id, { color: e.target.value })}
-                />
-                <span className="color-value">{selectedText.color}</span>
-              </div>
-
-              <div className="control-row">
-                <label>スタイル</label>
-                <button
-                  className={`btn-toggle ${selectedText.bold ? 'active' : ''}`}
-                  style={{ fontWeight: 700 }}
-                  onClick={() => updateText(selectedText.id, { bold: !selectedText.bold })}
-                >B</button>
-                <button
-                  className={`btn-toggle ${selectedText.italic ? 'active' : ''}`}
-                  style={{ fontStyle: 'italic' }}
-                  onClick={() => updateText(selectedText.id, { italic: !selectedText.italic })}
-                >I</button>
-              </div>
-
-              <div className="control-row">
-                <label>揃え</label>
-                {(['left', 'center', 'right'] as Align[]).map(a => (
-                  <button
-                    key={a}
-                    className={`btn-toggle ${selectedText.align === a ? 'active' : ''}`}
-                    onClick={() => updateText(selectedText.id, { align: a })}
-                  >
-                    {a === 'left' ? '左' : a === 'center' ? '中' : '右'}
-                  </button>
-                ))}
-              </div>
-
-              {/* Shadow */}
-              <div className="control-row">
-                <label>影</label>
-                <button
-                  className={`btn-toggle ${selectedText.shadowEnabled ? 'active' : ''}`}
-                  onClick={() => updateText(selectedText.id, { shadowEnabled: !selectedText.shadowEnabled })}
-                >
-                  {selectedText.shadowEnabled ? 'ON' : 'OFF'}
-                </button>
-                {selectedText.shadowEnabled && (
-                  <input
-                    type="color"
-                    className="color-input"
-                    value={selectedText.shadowColor}
-                    onChange={e => updateText(selectedText.id, { shadowColor: e.target.value })}
-                    title="影の色"
-                  />
-                )}
-              </div>
-              {selectedText.shadowEnabled && (
-                <div className="control-row">
-                  <label>影強度</label>
-                  <input
-                    type="range"
-                    className="range"
-                    min={0} max={40}
-                    value={selectedText.shadowBlur}
-                    onChange={e => updateText(selectedText.id, { shadowBlur: Number(e.target.value) })}
-                  />
-                  <span className="value-badge">{selectedText.shadowBlur}</span>
-                </div>
-              )}
-
-              {/* Outline */}
-              <div className="control-row">
-                <label>縁取り</label>
-                <input
-                  type="color"
-                  className="color-input"
-                  value={selectedText.outlineColor}
-                  onChange={e => updateText(selectedText.id, { outlineColor: e.target.value })}
-                  title="縁取りの色"
-                />
-                <input
-                  type="range"
-                  className="range"
-                  min={0} max={20}
-                  value={selectedText.outlineWidth}
-                  onChange={e => updateText(selectedText.id, { outlineWidth: Number(e.target.value) })}
-                />
-                <span className="value-badge">{selectedText.outlineWidth}px</span>
-              </div>
-            </section>
-          )}
 
           {/* Download & Share */}
           <section className="panel-section s-export">

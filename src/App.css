@@ -484,27 +484,47 @@
 .btn-share:active { transform: translateY(0); }
 
 /* ══════════════════════════════════════════════
-   Text List
+   Text Accordion
 ══════════════════════════════════════════════ */
 .text-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
-.text-item {
+
+/* ── Accordion item ── */
+.text-accordion {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.text-accordion.open {
+  border-color: #6366f1;
+  background: #ffffff;
+}
+
+/* ── Header (always visible) ── */
+.text-accordion-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 7px 10px;
-  border-radius: 7px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  gap: 8px;
+  padding: 8px 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  user-select: none;
+  transition: background 0.15s;
+  min-height: 40px;
 }
-.text-item:hover    { border-color: #a5b4fc; background: #eef2ff; }
-.text-item.selected { border-color: #6366f1; background: #eef2ff; }
+.text-accordion-header:hover { background: #eef2ff; }
+.text-accordion.open .text-accordion-header { background: #eef2ff; }
+
+.accordion-arrow {
+  font-size: 9px;
+  color: #6366f1;
+  flex-shrink: 0;
+  width: 12px;
+}
 .text-preview {
   font-size: 12px;
   color: #334155;
@@ -512,6 +532,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Body (editing controls) ── */
+.text-accordion-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
 }
 
 /* ══════════════════════════════════════════════
