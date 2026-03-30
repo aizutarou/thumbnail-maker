@@ -390,8 +390,10 @@
 }
 .btn-primary { background: #6366f1; color: #fff; }
 .btn-primary:hover { background: #4f46e5; }
-.btn-danger  { background: #fee2e2; color: #dc2626; }
+.btn-danger     { background: #fee2e2; color: #dc2626; }
 .btn-danger:hover  { background: #fecaca; }
+.btn-duplicate  { background: #e0e7ff; color: #4f46e5; font-size: 12px; }
+.btn-duplicate:hover { background: #c7d2fe; }
 
 .btn-icon {
   width: 22px;

@@ -226,6 +226,20 @@ export default function App() {
     if (selectedId === id) setSelectedId(null)
   }
 
+  const duplicateText = (id: string) => {
+    recordHistory()
+    const src = texts.find(t => t.id === id)
+    if (!src) return
+    const copy: TextItem = {
+      ...src,
+      id: `${Date.now()}-${Math.random()}`,
+      x: src.x + 20,
+      y: src.y + 20,
+    }
+    setTexts(prev => [...prev, copy])
+    setSelectedId(copy.id)
+  }
+
   // ── Preset change ──
   const handlePresetChange = (id: string) => {
     recordHistory()
@@ -273,7 +287,7 @@ export default function App() {
   // ── PNG Download ──
   const handleDownload = () => {
     if (!stageRef.current) return
-    const uri = stageRef.current.toDataURL({ pixelRatio: 1 / scale })
+    const uri = stageRef.current.toDataURL({ pixelRatio: 2 / scale })
     const a = document.createElement('a')
     a.download = `thumbnail-${preset.id}.png`
     a.href = uri
@@ -538,6 +552,11 @@ export default function App() {
                     <span className="text-preview">
                       {t.text.slice(0, 15)}{t.text.length > 15 ? '…' : ''}
                     </span>
+                    <button
+                      className="btn-icon btn-duplicate"
+                      title="複製"
+                      onClick={e => { e.stopPropagation(); duplicateText(t.id) }}
+                    >⧉</button>
                     <button
                       className="btn-icon btn-danger"
                       title="削除"
