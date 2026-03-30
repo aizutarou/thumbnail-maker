@@ -36,7 +36,6 @@ const MOBILE_TABS: { id: MobileTab; label: string; icon: string }[] = [
   { id: 'template', label: 'テンプレ', icon: '🎨' },
   { id: 'bg',       label: '背景',     icon: '🖼'  },
   { id: 'text',     label: 'テキスト', icon: 'T'  },
-  { id: 'export',   label: '出力',     icon: '⬇'  },
 ]
 
 function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextItem {
@@ -679,19 +678,6 @@ export default function App() {
             </div>
           </section>
 
-          {/* Download & Share */}
-          <section className="panel-section s-export">
-            <div className="preset-badge">
-              {preset.width} × {preset.height} px
-            </div>
-            <button className="btn-download" onClick={handleDownload}>
-              ⬇ PNG でダウンロード
-            </button>
-            <button className="btn-share" onClick={handleShare}>
-              𝕏 でシェアする
-            </button>
-          </section>
-
         </aside>
 
         {/* ── Right Canvas Preview ── */}
@@ -746,6 +732,17 @@ export default function App() {
             </Stage>
           </div>
           <p className="canvas-hint">テキストはドラッグで移動 • クリックで選択</p>
+
+          {/* ── Export Bar ── */}
+          <div className="export-bar">
+            <span className="preset-badge">{preset.width} × {preset.height} px</span>
+            <button className="btn-download" onClick={handleDownload}>
+              ⬇ PNG でダウンロード
+            </button>
+            <button className="btn-share" onClick={handleShare}>
+              𝕏 でシェアする
+            </button>
+          </div>
         </main>
 
       </div>
