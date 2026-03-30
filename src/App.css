@@ -390,6 +390,9 @@
 }
 .btn-primary { background: #6366f1; color: #fff; }
 .btn-primary:hover { background: #4f46e5; }
+.btn-auto { background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff; }
+.btn-auto:hover:not(:disabled) { opacity: 0.88; }
+.btn-auto:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-danger     { background: #fee2e2; color: #dc2626; }
 .btn-danger:hover  { background: #fecaca; }
 .btn-duplicate  { background: #e0e7ff; color: #4f46e5; font-size: 12px; }
