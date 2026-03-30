@@ -38,14 +38,6 @@ const MOBILE_TABS: { id: MobileTab; label: string; icon: string }[] = [
   { id: 'text',     label: 'テキスト', icon: 'T'  },
 ]
 
-function isDarkColor(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance < 0.5
-}
-
 function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextItem {
   return {
     id: `${Date.now()}-${Math.random()}`,
@@ -248,78 +240,6 @@ export default function App() {
     setSelectedId(copy.id)
   }
 
-  // ── Auto Layout ──
-  const autoLayout = () => {
-    if (texts.length === 0) return
-    recordHistory()
-
-    const W = preset.width
-    const H = preset.height
-    const pad = Math.round(W * 0.07)
-    const textWidth = W - pad * 2
-
-    // Determine base text color from background
-    const bgIsDark = bgGradient
-      ? isDarkColor(bgGradient.from) || isDarkColor(bgGradient.to)
-      : isDarkColor(bgColor)
-    const hasBgImage = !!bgImageUrl
-    const useLight = bgIsDark || hasBgImage
-    const baseColor  = useLight ? '#ffffff' : '#1a1a2e'
-    const useShadow  = hasBgImage
-
-    // Font size: shrinks as text gets longer, scaled to canvas height
-    const calcFontSize = (text: string, role: 'title' | 'sub' | 'body') => {
-      const len = text.length
-      const base = role === 'title'
-        ? H * 0.14
-        : role === 'sub'
-        ? H * 0.085
-        : H * 0.06
-      const factor = len <= 5 ? 1 : len <= 10 ? 0.85 : len <= 18 ? 0.7 : 0.55
-      return Math.round(base * factor)
-    }
-
-    // Layout positions per text count
-    const positions: { yRatio: number; role: 'title' | 'sub' | 'body' }[] = (() => {
-      const n = texts.length
-      if (n === 1) return [{ yRatio: 0.35, role: 'title' }]
-      if (n === 2) return [
-        { yRatio: 0.22, role: 'title' },
-        { yRatio: 0.58, role: 'sub'   },
-      ]
-      if (n === 3) return [
-        { yRatio: 0.15, role: 'title' },
-        { yRatio: 0.48, role: 'sub'   },
-        { yRatio: 0.72, role: 'body'  },
-      ]
-      // 4+: distribute evenly
-      return texts.map((_, i) => ({
-        yRatio: 0.08 + i * (0.82 / (texts.length - 1)),
-        role: i === 0 ? 'title' : i === 1 ? 'sub' : 'body',
-      }))
-    })()
-
-    const newTexts = texts.map((t, i) => {
-      const { yRatio, role } = positions[i]
-      return {
-        ...t,
-        x: pad,
-        y: Math.round(H * yRatio),
-        width: textWidth,
-        fontSize: calcFontSize(t.text, role),
-        align: 'center' as const,
-        bold: role === 'title',
-        color: baseColor,
-        shadowEnabled: useShadow,
-        shadowColor: '#000000',
-        shadowBlur: useShadow ? 18 : t.shadowBlur,
-        shadowOffsetX: useShadow ? 2 : t.shadowOffsetX,
-        shadowOffsetY: useShadow ? 2 : t.shadowOffsetY,
-      }
-    })
-    setTexts(newTexts)
-    setSelectedId(null)
-  }
 
   // ── Preset change ──
   const handlePresetChange = (id: string) => {
@@ -618,12 +538,6 @@ export default function App() {
           <section className="panel-section s-text">
             <div className="section-header">
               <h2>テキスト</h2>
-              <button
-                className="btn-small btn-auto"
-                onClick={autoLayout}
-                disabled={texts.length === 0}
-                title="現在の背景・テキスト数に合わせて自動でレイアウトを整えます"
-              >✨ 自動整列</button>
               <button className="btn-small btn-primary" onClick={addText}>＋ 追加</button>
             </div>
             <div className="text-list">
