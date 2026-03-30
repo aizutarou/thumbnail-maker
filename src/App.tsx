@@ -3,6 +3,8 @@ import Konva from 'konva'
 import { Stage, Layer, Rect, Text, Image as KonvaImage } from 'react-konva'
 import { TEMPLATES, applyTemplate, getGradientPoints } from './templates'
 import type { TextItem, SizePreset, BGGradient, Align, MobileTab, GradientAngle, HistorySnapshot } from './types'
+import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
+import type { SavedState } from './storage'
 import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -80,6 +82,51 @@ export default function App() {
     return result.texts
   })
   const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  // ── Auto-save & Restore ──
+  type SaveStatus = 'idle' | 'saving' | 'saved'
+  const [saveStatus,        setSaveStatus]        = useState<SaveStatus>('idle')
+  const [restoreData,       setRestoreData]       = useState<SavedState | null>(null)
+  const saveTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Check for saved state on mount
+  useEffect(() => {
+    const saved = loadSavedState()
+    if (saved) setRestoreData(saved)
+  }, [])
+
+  // Debounced auto-save (1.5s after last change)
+  useEffect(() => {
+    if (saveTimerRef.current)  clearTimeout(saveTimerRef.current)
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    setSaveStatus('saving')
+    saveTimerRef.current = setTimeout(() => {
+      saveState({ texts, bgColor, bgGradient, presetId: preset.id, savedAt: new Date().toISOString() })
+      setSaveStatus('saved')
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2500)
+    }, 1500)
+    return () => {
+      if (saveTimerRef.current)  clearTimeout(saveTimerRef.current)
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    }
+  }, [texts, bgColor, bgGradient, preset.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRestore = () => {
+    if (!restoreData) return
+    const p = SIZE_PRESETS.find(p => p.id === restoreData.presetId) ?? SIZE_PRESETS[0]
+    setPreset(p)
+    setBgColor(restoreData.bgColor)
+    setBgGradient(restoreData.bgGradient)
+    setTexts(restoreData.texts)
+    setBgImageUrl(null)
+    setRestoreData(null)
+  }
+
+  const handleDismissRestore = () => {
+    clearSavedState()
+    setRestoreData(null)
+  }
 
   // ── History (Undo / Redo) ──
   const MAX_HISTORY = 40
@@ -290,6 +337,8 @@ export default function App() {
         </div>
         <p className="header-sub">OGP・YouTube・X対応の無料画像作成ツール — 登録不要</p>
         <div className="header-actions">
+          {saveStatus === 'saving' && <span className="save-indicator saving">保存中…</span>}
+          {saveStatus === 'saved'  && <span className="save-indicator saved">✓ 保存済み</span>}
           <button
             className="btn-undoredo"
             onClick={handleUndo}
@@ -304,6 +353,17 @@ export default function App() {
           >↪</button>
         </div>
       </header>
+
+      {/* ── Restore Banner ── */}
+      {restoreData && (
+        <div className="restore-banner">
+          <span className="restore-msg">
+            💾 {formatTimeAgo(restoreData.savedAt)}の作業が見つかりました
+          </span>
+          <button className="btn-restore" onClick={handleRestore}>復元する</button>
+          <button className="btn-dismiss" onClick={handleDismissRestore}>新しく始める</button>
+        </div>
+      )}
 
       <div className="workspace">
 

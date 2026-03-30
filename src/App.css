@@ -76,6 +76,77 @@
   cursor: not-allowed;
 }
 
+/* ── Save Indicator ── */
+.save-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.save-indicator.saving {
+  color: #94a3b8;
+  background: #1e293b;
+}
+.save-indicator.saved {
+  color: #4ade80;
+  background: rgba(74,222,128,0.1);
+  animation: fadeout 2.5s forwards;
+}
+@keyframes fadeout {
+  0%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Restore Banner ── */
+.restore-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: #1e3a5f;
+  border-bottom: 1px solid #1d4ed8;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.restore-msg {
+  font-size: 13px;
+  color: #bfdbfe;
+  flex: 1;
+  min-width: 160px;
+}
+.btn-restore {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-restore:hover { background: #2563eb; }
+.btn-dismiss {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.btn-dismiss:hover { color: #f8fafc; }
+
 /* ══════════════════════════════════════════════
    Workspace
 ══════════════════════════════════════════════ */
