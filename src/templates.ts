@@ -169,6 +169,7 @@ export function applyTemplate(
     italic: def.italic,
     align: def.align,
     width: Math.round(def.widthRatio * preset.width),
+    rotation: 0,
     shadowEnabled: false,
     shadowColor: '#000000',
     shadowBlur: 10,

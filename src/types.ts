@@ -12,6 +12,7 @@ export interface TextItem {
   italic: boolean
   align: Align
   width: number
+  rotation: number
   // Shadow
   shadowEnabled: boolean
   shadowColor: string
@@ -57,6 +58,7 @@ export interface ImageItem {
   width: number
   height: number
   opacity: number
+  rotation: number
 }
 
 export interface HistorySnapshot {

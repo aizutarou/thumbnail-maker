@@ -46,6 +46,7 @@ function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextIt
     italic: false,
     align: 'left',
     width: preset.width - 120,
+    rotation: 0,
     shadowEnabled: false,
     shadowColor: '#000000',
     shadowBlur: 10,
@@ -300,9 +301,10 @@ export default function App() {
             url: compressedUrl,
             x: Math.round((preset.width  - orig.width  * s) / 2),
             y: Math.round((preset.height - orig.height * s) / 2),
-            width:  Math.round(orig.width  * s),
-            height: Math.round(orig.height * s),
-            opacity: 1,
+          width:   Math.round(orig.width  * s),
+          height:  Math.round(orig.height * s),
+          opacity:  1,
+          rotation: 0,
           }
           loadedImagesRef.current.set(item.id, el)
           setImages(prev => [...prev, item])
@@ -789,6 +791,7 @@ export default function App() {
                         width={img.width}
                         height={img.height}
                         opacity={img.opacity}
+                        rotation={img.rotation ?? 0}
                         draggable
                         onClick={() => { setSelectedImageId(img.id); setSelectedId(null) }}
                         onTap={() => { setSelectedImageId(img.id); setSelectedId(null) }}
@@ -797,10 +800,11 @@ export default function App() {
                           const node = imageRefs.current.get(img.id)
                           if (!node) return
                           updateImage(img.id, {
-                            x: node.x(),
-                            y: node.y(),
-                            width:  Math.abs(node.width()  * node.scaleX()),
-                            height: Math.abs(node.height() * node.scaleY()),
+                            x:        node.x(),
+                            y:        node.y(),
+                            width:    Math.abs(node.width()  * node.scaleX()),
+                            height:   Math.abs(node.height() * node.scaleY()),
+                            rotation: node.rotation(),
                           })
                           node.scaleX(1)
                           node.scaleY(1)
@@ -828,6 +832,7 @@ export default function App() {
                       fontStyle={fontStyle(t)}
                       align={t.align}
                       lineHeight={1.3}
+                      rotation={t.rotation ?? 0}
                       draggable
                       onClick={() => { setSelectedId(t.id); setSelectedImageId(null) }}
                       onTap={() => { setSelectedId(t.id); setSelectedImageId(null) }}
@@ -836,7 +841,7 @@ export default function App() {
                         const node = textRefs.current.get(t.id)
                         if (!node) return
                         const newWidth = Math.max(80, Math.abs(node.width() * node.scaleX()))
-                        updateText(t.id, { x: node.x(), y: node.y(), width: newWidth })
+                        updateText(t.id, { x: node.x(), y: node.y(), width: newWidth, rotation: node.rotation() })
                         node.scaleX(1)
                         node.scaleY(1)
                       }}
@@ -855,17 +860,17 @@ export default function App() {
                   {/* Transformer for image objects */}
                   <Transformer
                     ref={transformerRef}
-                    rotateEnabled={false}
+                    rotateEnabled={true}
                     keepRatio={false}
                     boundBoxFunc={(oldBox, newBox) => {
                       if (newBox.width < 20 || newBox.height < 20) return oldBox
                       return newBox
                     }}
                   />
-                  {/* Transformer for text objects — width-only (left/right handles) */}
+                  {/* Transformer for text objects — width resize + rotation */}
                   <Transformer
                     ref={textTransformerRef}
-                    rotateEnabled={false}
+                    rotateEnabled={true}
                     enabledAnchors={['middle-left', 'middle-right']}
                     boundBoxFunc={(oldBox, newBox) => {
                       if (newBox.width < 80) return oldBox
