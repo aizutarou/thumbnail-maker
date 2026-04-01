@@ -158,57 +158,10 @@
 }
 
 /* ══════════════════════════════════════════════
-   Desktop Sidebar
-══════════════════════════════════════════════ */
-.sidebar {
-  width: 68px;
-  flex-shrink: 0;
-  background: #f8fafc;
-  border-right: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0;
-  gap: 2px;
-  z-index: 1;
-}
-.sidebar-item {
-  width: 56px;
-  padding: 9px 4px 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s;
-  font-family: inherit;
-}
-.sidebar-item:hover { background: #e2e8f0; }
-.sidebar-item.active { background: #eef2ff; }
-.sidebar-icon { font-size: 20px; line-height: 1; }
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: #64748b;
-  white-space: nowrap;
-}
-.sidebar-item.active .sidebar-label { color: #6366f1; }
-
-/* ══════════════════════════════════════════════
-   Mobile Tab Bar (hidden on desktop)
-══════════════════════════════════════════════ */
-.mobile-tabs {
-  display: none;
-}
-
-/* ══════════════════════════════════════════════
-   Panel Content
+   Control Panel
 ══════════════════════════════════════════════ */
 .control-panel {
-  width: 260px;
+  width: 280px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
@@ -216,12 +169,6 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-}
-
-/* Desktop: show only active panel section */
-.control-panel[data-tab="bg"]   .panel-section:not(.s-bg),
-.control-panel[data-tab="text"] .panel-section:not(.s-text) {
-  display: none;
 }
 .control-panel::-webkit-scrollbar { width: 4px; }
 .control-panel::-webkit-scrollbar-thumb {
@@ -257,58 +204,6 @@
   margin: 0;
 }
 
-/* ══════════════════════════════════════════════
-   Template Gallery
-══════════════════════════════════════════════ */
-.panel-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 4px 0;
-}
-.tmpl-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-.tmpl-card {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: none;
-  border: 2px solid transparent;
-  border-radius: 7px;
-  padding: 3px;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
-}
-.tmpl-card:hover {
-  border-color: #a5b4fc;
-  transform: translateY(-1px);
-}
-.tmpl-card.active {
-  border-color: #6366f1;
-}
-.tmpl-thumb {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  background: #dde3ef;
-}
-.tmpl-line {
-  position: absolute;
-  border-radius: 2px;
-}
-.tmpl-name {
-  font-size: 10px;
-  color: #64748b;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1;
-}
 
 /* ══════════════════════════════════════════════
    Form Controls
@@ -706,47 +601,6 @@
     border-top: 1px solid #e2e8f0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Tab bar — in normal flow at bottom */
-  .mobile-tabs {
-    display: flex;
-    flex: 0 0 56px;
-    background: #ffffff;
-    border-top: 1px solid #e2e8f0;
-    z-index: 20;
-  }
-  .mobile-tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: background 0.15s;
-    padding: 0;
-    color: #94a3b8;
-    font-family: inherit;
-    min-height: 44px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .mobile-tab.active {
-    color: #6366f1;
-    background: #eef2ff;
-  }
-  .mobile-tab-icon  { font-size: 20px; line-height: 1; }
-  .mobile-tab-label { font-size: 10px; font-weight: 600; }
-
-  /* Hide desktop sidebar on mobile */
-  .sidebar { display: none; }
-
-  /* Show only active tab's sections (mobile) */
-  .control-panel[data-tab="bg"]   .panel-section:not(.s-bg),
-  .control-panel[data-tab="text"] .panel-section:not(.s-text) {
-    display: none;
   }
 
   /* Touch targets — 44px minimum (Apple HIG) */

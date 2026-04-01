@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Konva from 'konva'
 import { Stage, Layer, Rect, Text, Image as KonvaImage } from 'react-konva'
-import { TEMPLATES, applyTemplate, getGradientPoints } from './templates'
-import type { TextItem, SizePreset, BGGradient, Align, MobileTab, GradientAngle, HistorySnapshot } from './types'
+import { getGradientPoints } from './templates'
+import type { TextItem, SizePreset, BGGradient, Align, GradientAngle, HistorySnapshot } from './types'
 import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
 import type { SavedState } from './storage'
 import './App.css'
@@ -30,11 +30,6 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
   { value: 'to-right',        label: '横（→）'   },
   { value: 'to-bottom',       label: '縦（↓）'   },
   { value: 'to-bottom-left',  label: '斜め（↙）' },
-]
-
-const MOBILE_TABS: { id: MobileTab; label: string; icon: string }[] = [
-  { id: 'bg',   label: '背景',     icon: '🖼' },
-  { id: 'text', label: 'テキスト', icon: 'T'  },
 ]
 
 function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextItem {
@@ -73,13 +68,8 @@ export default function App() {
   const [bgImageUrl, setBgImageUrl] = useState<string | null>(null)
   const [bgOverlay,  setBgOverlay]  = useState(0)
   const [scale,      setScale]      = useState(0.5)
-  const [mobileTab,  setMobileTab]  = useState<MobileTab>('text')
-  const [activeTemplate, setActiveTemplate] = useState<string | null>(null)
 
-  const [texts,      setTexts]      = useState<TextItem[]>(() => {
-    const result = applyTemplate(TEMPLATES[0], SIZE_PRESETS[0])
-    return result.texts
-  })
+  const [texts,      setTexts]      = useState<TextItem[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // ── Auto-save & Restore ──
@@ -253,16 +243,6 @@ export default function App() {
     setTexts(prev => prev.map(t => ({ ...t, width: next.width - 120 })))
   }
 
-  // ── Template apply (layout only — background is preserved) ──
-  const handleApplyTemplate = (templateId: string) => {
-    recordHistory()
-    const tmpl = TEMPLATES.find(t => t.id === templateId)!
-    const result = applyTemplate(tmpl, preset)
-    setTexts(result.texts)
-    setSelectedId(null)
-    setActiveTemplate(templateId)
-  }
-
   // ── Background image upload ──
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -391,36 +371,8 @@ export default function App() {
 
       <div className="workspace">
 
-        {/* ── Desktop Sidebar ── */}
-        <nav className="sidebar">
-          {MOBILE_TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`sidebar-item ${mobileTab === tab.id ? 'active' : ''}`}
-              onClick={() => setMobileTab(tab.id)}
-            >
-              <span className="sidebar-icon">{tab.icon}</span>
-              <span className="sidebar-label">{tab.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        {/* ── Mobile Tab Bar ── */}
-        <nav className="mobile-tabs">
-          {MOBILE_TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`mobile-tab ${mobileTab === tab.id ? 'active' : ''}`}
-              onClick={() => setMobileTab(tab.id)}
-            >
-              <span className="mobile-tab-icon">{tab.icon}</span>
-              <span className="mobile-tab-label">{tab.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        {/* ── Panel Content ── */}
-        <aside className="control-panel" data-tab={mobileTab}>
+        {/* ── Control Panel ── */}
+        <aside className="control-panel">
 
           {/* Background */}
           <section className="panel-section s-bg">
@@ -531,46 +483,9 @@ export default function App() {
             )}
           </section>
 
-          {/* Text + Layout */}
+          {/* Text */}
           <section className="panel-section s-text">
 
-            {/* Layout picker */}
-            <div className="section-header">
-              <h2>レイアウト</h2>
-            </div>
-            <p className="section-note">テキストの配置のみ適用。背景はそのまま保持されます。</p>
-            <div className="tmpl-grid">
-              {TEMPLATES.map(t => (
-                <button
-                  key={t.id}
-                  className={`tmpl-card ${activeTemplate === t.id ? 'active' : ''}`}
-                  onClick={() => handleApplyTemplate(t.id)}
-                  title={t.name}
-                >
-                  <div className="tmpl-thumb">
-                    {t.texts.map((txt, i) => (
-                      <div
-                        key={i}
-                        className="tmpl-line"
-                        style={{
-                          top:    `${txt.yRatio * 100}%`,
-                          left:   txt.align === 'right' ? 'auto' : `${txt.xRatio * 100}%`,
-                          right:  txt.align === 'right' ? `${txt.xRatio * 100}%` : 'auto',
-                          width:  `${txt.widthRatio * (txt.align === 'center' ? 68 : 78)}%`,
-                          height: i === 0 ? '13%' : '8%',
-                          background: i === 0 ? '#334155cc' : i === 1 ? '#94a3b8bb' : '#cbd5e177',
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span className="tmpl-name">{t.name}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="panel-divider" />
-
-            {/* Text list */}
             <div className="section-header">
               <h2>テキスト</h2>
               <button className="btn-small btn-primary" onClick={addText}>＋ 追加</button>
