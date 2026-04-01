@@ -423,18 +423,21 @@ export default function App() {
                   onClick={() => handleApplyTemplate(t.id)}
                   title={t.name}
                 >
-                  <div
-                    className="tmpl-thumb"
-                    style={{ background: t.thumbStyle }}
-                  >
-                    <div
-                      className="tmpl-line tmpl-line-title"
-                      style={{ background: t.texts[0]?.color + 'bb' }}
-                    />
-                    <div
-                      className="tmpl-line tmpl-line-sub"
-                      style={{ background: t.texts[1]?.color + '88' }}
-                    />
+                  <div className="tmpl-thumb">
+                    {t.texts.map((txt, i) => (
+                      <div
+                        key={i}
+                        className="tmpl-line"
+                        style={{
+                          top:    `${txt.yRatio * 100}%`,
+                          left:   txt.align === 'right' ? 'auto' : `${txt.xRatio * 100}%`,
+                          right:  txt.align === 'right' ? `${txt.xRatio * 100}%` : 'auto',
+                          width:  `${txt.widthRatio * (txt.align === 'center' ? 68 : 78)}%`,
+                          height: i === 0 ? '13%' : '8%',
+                          background: i === 0 ? '#334155cc' : i === 1 ? '#94a3b8bb' : '#cbd5e177',
+                        }}
+                      />
+                    ))}
                   </div>
                   <span className="tmpl-name">{t.name}</span>
                 </button>

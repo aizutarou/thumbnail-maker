@@ -1,149 +1,151 @@
 import type { TemplateDef, TemplateDef as TD, BGGradient, TextItem, SizePreset } from './types'
 
 // ─────────────────────────────────────────────
-// 12 template definitions
+// 12 layout templates — background is NOT applied (layout only).
 // Positions use ratios (0–1) relative to canvas size.
-// xRatio/yRatio = left/top edge of the text box.
-// fontSizeRatio = fontSize / canvasHeight
 // ─────────────────────────────────────────────
 export const TEMPLATES: TemplateDef[] = [
+  // ── 2-text / standard ──
   {
-    id: 'night',
-    name: 'ナイトモード',
-    category: '黒系',
-    bgColor: '#0a0a0a',
-    thumbStyle: '#0a0a0a',
+    id: 'layout-2-left',
+    name: '2段・左揃え',
+    category: 'スタンダード',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.9  },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#888888', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.9  },
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.90 },
+      { text: 'サブタイトル・説明文', xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.90 },
     ],
   },
   {
-    id: 'indigo',
-    name: 'インディゴ',
-    category: 'グラデーション',
-    bgColor: '#4f46e5',
-    bgGradient: { from: '#4f46e5', to: '#7c3aed', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+    id: 'layout-2-center',
+    name: '2段・中央揃え',
+    category: 'スタンダード',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.10, yRatio: 0.26, fontSizeRatio: 0.105, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.10, yRatio: 0.59, fontSizeRatio: 0.053, color: '#c4b5fd', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'タイトルを入力',       xRatio: 0.10, yRatio: 0.25, fontSizeRatio: 0.105, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'サブタイトル・説明文', xRatio: 0.10, yRatio: 0.59, fontSizeRatio: 0.053, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
     ],
   },
   {
-    id: 'sunset',
-    name: 'サンセット',
-    category: 'グラデーション',
-    bgColor: '#f97316',
-    bgGradient: { from: '#f97316', to: '#db2777', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #f97316, #db2777)',
+    id: 'layout-2-right',
+    name: '2段・右揃え',
+    category: 'スタンダード',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#fce7f3', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'right',  widthRatio: 0.90 },
+      { text: 'サブタイトル・説明文', xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'right',  widthRatio: 0.90 },
+    ],
+  },
+
+  // ── 2-text / top-heavy ──
+  {
+    id: 'layout-top-left',
+    name: '上寄り・左揃え',
+    category: '上寄り',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
+    texts: [
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.10, fontSizeRatio: 0.110, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.90 },
+      { text: 'サブタイトル・説明文', xRatio: 0.05, yRatio: 0.42, fontSizeRatio: 0.055, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.90 },
     ],
   },
   {
-    id: 'ocean',
-    name: 'オーシャン',
-    category: 'グラデーション',
-    bgColor: '#0c1445',
-    bgGradient: { from: '#0c1445', to: '#1d4ed8', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #0c1445, #1d4ed8)',
+    id: 'layout-top-center',
+    name: '上寄り・中央揃え',
+    category: '上寄り',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#93c5fd', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
+      { text: 'タイトルを入力',       xRatio: 0.10, yRatio: 0.10, fontSizeRatio: 0.100, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'サブタイトル・説明文', xRatio: 0.10, yRatio: 0.42, fontSizeRatio: 0.052, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
+    ],
+  },
+
+  // ── 2-text / bottom-heavy ──
+  {
+    id: 'layout-bottom-left',
+    name: '下寄り・左揃え',
+    category: '下寄り',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
+    texts: [
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.50, fontSizeRatio: 0.110, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.90 },
+      { text: 'サブタイトル・説明文', xRatio: 0.05, yRatio: 0.76, fontSizeRatio: 0.055, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.90 },
     ],
   },
   {
-    id: 'minimal',
-    name: 'ミニマル白',
-    category: '明るい',
-    bgColor: '#ffffff',
-    thumbStyle: '#f8fafc',
+    id: 'layout-bottom-center',
+    name: '下寄り・中央揃え',
+    category: '下寄り',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#1e293b', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#64748b', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
+      { text: 'タイトルを入力',       xRatio: 0.10, yRatio: 0.50, fontSizeRatio: 0.100, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'サブタイトル・説明文', xRatio: 0.10, yRatio: 0.76, fontSizeRatio: 0.050, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
+    ],
+  },
+
+  // ── 2-text / spread ──
+  {
+    id: 'layout-spread',
+    name: '上下分割',
+    category: 'ワイド',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
+    texts: [
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.08, fontSizeRatio: 0.110, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.90 },
+      { text: 'サブタイトル・説明文', xRatio: 0.05, yRatio: 0.77, fontSizeRatio: 0.055, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.90 },
+    ],
+  },
+
+  // ── 1-text ──
+  {
+    id: 'layout-1-center',
+    name: '1段・中央',
+    category: '1段',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
+    texts: [
+      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.37, fontSizeRatio: 0.130, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true, italic: false, align: 'center', widthRatio: 0.90 },
     ],
   },
   {
-    id: 'corporate',
-    name: 'コーポレート',
-    category: '黒系',
-    bgColor: '#0f172a',
-    thumbStyle: '#0f172a',
+    id: 'layout-1-left',
+    name: '1段・左揃え',
+    category: '1段',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#f8fafc', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#38bdf8', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
+      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.37, fontSizeRatio: 0.130, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true, italic: false, align: 'left', widthRatio: 0.90 },
+    ],
+  },
+
+  // ── 3-text ──
+  {
+    id: 'layout-3-left',
+    name: '3段・左揃え',
+    category: '3段',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
+    texts: [
+      { text: 'タイトルを入力',       xRatio: 0.05, yRatio: 0.12, fontSizeRatio: 0.100, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left', widthRatio: 0.90 },
+      { text: 'サブタイトル',         xRatio: 0.05, yRatio: 0.44, fontSizeRatio: 0.065, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left', widthRatio: 0.90 },
+      { text: '補足テキスト',         xRatio: 0.05, yRatio: 0.70, fontSizeRatio: 0.045, color: '#999999', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left', widthRatio: 0.90 },
     ],
   },
   {
-    id: 'neon',
-    name: 'ネオン',
-    category: '黒系',
-    bgColor: '#030712',
-    thumbStyle: '#030712',
+    id: 'layout-3-center',
+    name: '3段・中央揃え',
+    category: '3段',
+    bgColor: '#1a1a2e',
+    thumbStyle: '#dde3ef',
     texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#4ade80', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#6b7280', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
-    ],
-  },
-  {
-    id: 'cherry',
-    name: 'チェリー',
-    category: 'グラデーション',
-    bgColor: '#9f1239',
-    bgGradient: { from: '#9f1239', to: '#ef4444', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #9f1239, #ef4444)',
-    texts: [
-      { text: 'タイトルを入力', xRatio: 0.10, yRatio: 0.26, fontSizeRatio: 0.105, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.10, yRatio: 0.59, fontSizeRatio: 0.053, color: '#fecdd3', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
-    ],
-  },
-  {
-    id: 'emerald',
-    name: 'エメラルド',
-    category: '黒系',
-    bgColor: '#064e3b',
-    thumbStyle: '#064e3b',
-    texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#6ee7b7', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
-    ],
-  },
-  {
-    id: 'morning',
-    name: 'モーニング',
-    category: '明るい',
-    bgColor: '#dbeafe',
-    bgGradient: { from: '#bfdbfe', to: '#eff6ff', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #bfdbfe, #eff6ff)',
-    texts: [
-      { text: 'タイトルを入力', xRatio: 0.10, yRatio: 0.26, fontSizeRatio: 0.105, color: '#1e3a8a', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.10, yRatio: 0.59, fontSizeRatio: 0.053, color: '#3b82f6', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
-    ],
-  },
-  {
-    id: 'golden',
-    name: 'ゴールデン',
-    category: 'グラデーション',
-    bgColor: '#1c1007',
-    bgGradient: { from: '#1c1007', to: '#92400e', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #1c1007, #92400e)',
-    texts: [
-      { text: 'タイトルを入力', xRatio: 0.05, yRatio: 0.25, fontSizeRatio: 0.115, color: '#fbbf24', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'left',   widthRatio: 0.85 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.05, yRatio: 0.60, fontSizeRatio: 0.057, color: '#fde68a', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'left',   widthRatio: 0.85 },
-    ],
-  },
-  {
-    id: 'twilight',
-    name: 'トワイライト',
-    category: 'グラデーション',
-    bgColor: '#1e1b4b',
-    bgGradient: { from: '#1e1b4b', to: '#4c1d95', angle: 'to-bottom-right' },
-    thumbStyle: 'linear-gradient(135deg, #1e1b4b, #4c1d95)',
-    texts: [
-      { text: 'タイトルを入力', xRatio: 0.10, yRatio: 0.26, fontSizeRatio: 0.105, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
-      { text: 'サブタイトル・説明文',    xRatio: 0.10, yRatio: 0.59, fontSizeRatio: 0.053, color: '#ddd6fe', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'タイトルを入力',       xRatio: 0.10, yRatio: 0.12, fontSizeRatio: 0.095, color: '#ffffff', fontFamily: 'Noto Sans JP', bold: true,  italic: false, align: 'center', widthRatio: 0.80 },
+      { text: 'サブタイトル',         xRatio: 0.10, yRatio: 0.44, fontSizeRatio: 0.060, color: '#cccccc', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
+      { text: '補足テキスト',         xRatio: 0.10, yRatio: 0.70, fontSizeRatio: 0.042, color: '#999999', fontFamily: 'Noto Sans JP', bold: false, italic: false, align: 'center', widthRatio: 0.80 },
     ],
   },
 ]

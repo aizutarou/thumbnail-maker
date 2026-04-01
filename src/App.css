@@ -243,27 +243,11 @@
   border-radius: 4px;
   position: relative;
   overflow: hidden;
-  background-size: cover;
+  background: #dde3ef;
 }
 .tmpl-line {
   position: absolute;
-  left: 10%;
-  right: 10%;
   border-radius: 2px;
-}
-.tmpl-line-title {
-  top: 32%;
-  height: 14%;
-  width: 72%;
-  left: 8%;
-  right: auto;
-}
-.tmpl-line-sub {
-  top: 58%;
-  height: 9%;
-  width: 50%;
-  left: 8%;
-  right: auto;
 }
 .tmpl-name {
   font-size: 10px;
