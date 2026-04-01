@@ -6,6 +6,7 @@ export interface SavedState {
   texts: TextItem[]
   bgColor: string
   bgGradient: BGGradient | null
+  bgOverlay: number
   presetId: string
   savedAt: string
 }

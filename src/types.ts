@@ -56,6 +56,7 @@ export interface HistorySnapshot {
   bgColor: string
   bgGradient: BGGradient | null
   bgImageUrl: string | null
+  bgOverlay: number
 }
 
 export interface TemplateDef {

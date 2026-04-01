@@ -72,6 +72,7 @@ export default function App() {
   const [bgGradient, setBgGradient] = useState<BGGradient | null>(null)
   const [bgImage,    setBgImage]    = useState<HTMLImageElement | null>(null)
   const [bgImageUrl, setBgImageUrl] = useState<string | null>(null)
+  const [bgOverlay,  setBgOverlay]  = useState(0)
   const [scale,      setScale]      = useState(0.5)
   const [mobileTab,  setMobileTab]  = useState<MobileTab>('template')
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null)
@@ -101,7 +102,7 @@ export default function App() {
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
     setSaveStatus('saving')
     saveTimerRef.current = setTimeout(() => {
-      saveState({ texts, bgColor, bgGradient, presetId: preset.id, savedAt: new Date().toISOString() })
+      saveState({ texts, bgColor, bgGradient, bgOverlay, presetId: preset.id, savedAt: new Date().toISOString() })
       setSaveStatus('saved')
       savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2500)
     }, 1500)
@@ -117,6 +118,7 @@ export default function App() {
     setPreset(p)
     setBgColor(restoreData.bgColor)
     setBgGradient(restoreData.bgGradient)
+    setBgOverlay(restoreData.bgOverlay ?? 0)
     setTexts(restoreData.texts)
     setBgImageUrl(null)
     setRestoreData(null)
@@ -139,7 +141,8 @@ export default function App() {
     bgColor,
     bgGradient: bgGradient ? { ...bgGradient } : null,
     bgImageUrl,
-  }), [texts, bgColor, bgGradient, bgImageUrl])
+    bgOverlay,
+  }), [texts, bgColor, bgGradient, bgImageUrl, bgOverlay])
 
   const recordHistory = useCallback(() => {
     const snap = captureSnapshot()
@@ -152,6 +155,7 @@ export default function App() {
     setBgColor(snap.bgColor)
     setBgGradient(snap.bgGradient)
     setBgImageUrl(snap.bgImageUrl)
+    setBgOverlay(snap.bgOverlay ?? 0)
   }
 
   const handleUndo = useCallback(() => {
@@ -307,12 +311,24 @@ export default function App() {
   const renderBackground = () => {
     if (bgImage) {
       return (
-        <KonvaImage
-          image={bgImage}
-          x={0} y={0}
-          width={preset.width}
-          height={preset.height}
-        />
+        <>
+          <KonvaImage
+            image={bgImage}
+            x={0} y={0}
+            width={preset.width}
+            height={preset.height}
+          />
+          {bgOverlay > 0 && (
+            <Rect
+              x={0} y={0}
+              width={preset.width}
+              height={preset.height}
+              fill="#000000"
+              opacity={bgOverlay / 100}
+              listening={false}
+            />
+          )}
+        </>
       )
     }
     if (bgGradient) {
@@ -527,11 +543,26 @@ export default function App() {
                 />
               </label>
               {bgImage && (
-                <button className="btn-small btn-danger" onClick={() => { recordHistory(); setBgImageUrl(null) }}>
+                <button className="btn-small btn-danger" onClick={() => { recordHistory(); setBgImageUrl(null); setBgOverlay(0) }}>
                   削除
                 </button>
               )}
             </div>
+
+            {/* Overlay slider — only shown when bg image is set */}
+            {bgImage && (
+              <div className="control-row">
+                <label>暗さ</label>
+                <input
+                  type="range"
+                  className="range"
+                  min={0} max={90}
+                  value={bgOverlay}
+                  onChange={e => setBgOverlay(Number(e.target.value))}
+                />
+                <span className="value-badge">{bgOverlay}%</span>
+              </div>
+            )}
           </section>
 
           {/* Text Accordion */}
