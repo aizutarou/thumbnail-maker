@@ -219,9 +219,8 @@
 }
 
 /* Desktop: show only active panel section */
-.control-panel[data-tab="template"] .panel-section:not(.s-template),
-.control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
-.control-panel[data-tab="text"]     .panel-section:not(.s-text) {
+.control-panel[data-tab="bg"]   .panel-section:not(.s-bg),
+.control-panel[data-tab="text"] .panel-section:not(.s-text) {
   display: none;
 }
 .control-panel::-webkit-scrollbar { width: 4px; }
@@ -261,9 +260,14 @@
 /* ══════════════════════════════════════════════
    Template Gallery
 ══════════════════════════════════════════════ */
+.panel-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 4px 0;
+}
 .tmpl-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
 .tmpl-card {
@@ -739,17 +743,10 @@
   /* Hide desktop sidebar on mobile */
   .sidebar { display: none; }
 
-  /* Show only active tab's sections (mobile overrides desktop rule) */
-  .control-panel[data-tab="template"] .panel-section:not(.s-template),
-  .control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
-  .control-panel[data-tab="text"]     .panel-section:not(.s-text) {
+  /* Show only active tab's sections (mobile) */
+  .control-panel[data-tab="bg"]   .panel-section:not(.s-bg),
+  .control-panel[data-tab="text"] .panel-section:not(.s-text) {
     display: none;
-  }
-
-  /* Template grid — 3 columns, bigger thumbnails */
-  .tmpl-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
   }
 
   /* Touch targets — 44px minimum (Apple HIG) */

@@ -1,6 +1,6 @@
 export type Align = 'left' | 'center' | 'right'
 export type GradientAngle = 'to-right' | 'to-bottom' | 'to-bottom-right' | 'to-bottom-left'
-export type MobileTab = 'template' | 'bg' | 'text'
+export type MobileTab = 'bg' | 'text'
 
 export interface TextItem {
   id: string

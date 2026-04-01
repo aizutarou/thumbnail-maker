@@ -33,9 +33,8 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
 ]
 
 const MOBILE_TABS: { id: MobileTab; label: string; icon: string }[] = [
-  { id: 'template', label: 'レイアウト', icon: '🎨' },
-  { id: 'bg',       label: '背景',     icon: '🖼'  },
-  { id: 'text',     label: 'テキスト', icon: 'T'  },
+  { id: 'bg',   label: '背景',     icon: '🖼' },
+  { id: 'text', label: 'テキスト', icon: 'T'  },
 ]
 
 function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextItem {
@@ -74,7 +73,7 @@ export default function App() {
   const [bgImageUrl, setBgImageUrl] = useState<string | null>(null)
   const [bgOverlay,  setBgOverlay]  = useState(0)
   const [scale,      setScale]      = useState(0.5)
-  const [mobileTab,  setMobileTab]  = useState<MobileTab>('template')
+  const [mobileTab,  setMobileTab]  = useState<MobileTab>('text')
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null)
 
   const [texts,      setTexts]      = useState<TextItem[]>(() => {
@@ -423,42 +422,6 @@ export default function App() {
         {/* ── Panel Content ── */}
         <aside className="control-panel" data-tab={mobileTab}>
 
-          {/* Template Gallery */}
-          <section className="panel-section s-template">
-            <div className="section-header">
-              <h2>レイアウト</h2>
-            </div>
-            <p className="section-note">テキストの配置のみ適用。背景はそのまま保持されます。</p>
-            <div className="tmpl-grid">
-              {TEMPLATES.map(t => (
-                <button
-                  key={t.id}
-                  className={`tmpl-card ${activeTemplate === t.id ? 'active' : ''}`}
-                  onClick={() => handleApplyTemplate(t.id)}
-                  title={t.name}
-                >
-                  <div className="tmpl-thumb">
-                    {t.texts.map((txt, i) => (
-                      <div
-                        key={i}
-                        className="tmpl-line"
-                        style={{
-                          top:    `${txt.yRatio * 100}%`,
-                          left:   txt.align === 'right' ? 'auto' : `${txt.xRatio * 100}%`,
-                          right:  txt.align === 'right' ? `${txt.xRatio * 100}%` : 'auto',
-                          width:  `${txt.widthRatio * (txt.align === 'center' ? 68 : 78)}%`,
-                          height: i === 0 ? '13%' : '8%',
-                          background: i === 0 ? '#334155cc' : i === 1 ? '#94a3b8bb' : '#cbd5e177',
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <span className="tmpl-name">{t.name}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
           {/* Background */}
           <section className="panel-section s-bg">
             <h2>背景</h2>
@@ -568,8 +531,46 @@ export default function App() {
             )}
           </section>
 
-          {/* Text Accordion */}
+          {/* Text + Layout */}
           <section className="panel-section s-text">
+
+            {/* Layout picker */}
+            <div className="section-header">
+              <h2>レイアウト</h2>
+            </div>
+            <p className="section-note">テキストの配置のみ適用。背景はそのまま保持されます。</p>
+            <div className="tmpl-grid">
+              {TEMPLATES.map(t => (
+                <button
+                  key={t.id}
+                  className={`tmpl-card ${activeTemplate === t.id ? 'active' : ''}`}
+                  onClick={() => handleApplyTemplate(t.id)}
+                  title={t.name}
+                >
+                  <div className="tmpl-thumb">
+                    {t.texts.map((txt, i) => (
+                      <div
+                        key={i}
+                        className="tmpl-line"
+                        style={{
+                          top:    `${txt.yRatio * 100}%`,
+                          left:   txt.align === 'right' ? 'auto' : `${txt.xRatio * 100}%`,
+                          right:  txt.align === 'right' ? `${txt.xRatio * 100}%` : 'auto',
+                          width:  `${txt.widthRatio * (txt.align === 'center' ? 68 : 78)}%`,
+                          height: i === 0 ? '13%' : '8%',
+                          background: i === 0 ? '#334155cc' : i === 1 ? '#94a3b8bb' : '#cbd5e177',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="tmpl-name">{t.name}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="panel-divider" />
+
+            {/* Text list */}
             <div className="section-header">
               <h2>テキスト</h2>
               <button className="btn-small btn-primary" onClick={addText}>＋ 追加</button>
