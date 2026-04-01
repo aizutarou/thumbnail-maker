@@ -58,11 +58,13 @@ function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextIt
 
 // ── Component ──────────────────────────────────────────────────────
 export default function App() {
-  const stageRef        = useRef<Konva.Stage>(null)
-  const previewRef      = useRef<HTMLDivElement>(null)
-  const imageRefs       = useRef<Map<string, Konva.Image>>(new Map())
-  const transformerRef  = useRef<Konva.Transformer>(null)
-  const loadedImagesRef = useRef<Map<string, HTMLImageElement>>(new Map())
+  const stageRef             = useRef<Konva.Stage>(null)
+  const previewRef           = useRef<HTMLDivElement>(null)
+  const imageRefs            = useRef<Map<string, Konva.Image>>(new Map())
+  const transformerRef       = useRef<Konva.Transformer>(null)
+  const loadedImagesRef      = useRef<Map<string, HTMLImageElement>>(new Map())
+  const textRefs             = useRef<Map<string, Konva.Text>>(new Map())
+  const textTransformerRef   = useRef<Konva.Transformer>(null)
 
   const [preset,     setPreset]     = useState<SizePreset>(SIZE_PRESETS[0])
   const [bgColor,    setBgColor]    = useState('#1a1a2e')
@@ -194,6 +196,14 @@ export default function App() {
     transformerRef.current.nodes(node ? [node] : [])
     transformerRef.current.getLayer()?.batchDraw()
   }, [selectedImageId])
+
+  // ── Attach transformer to selected text ──
+  useEffect(() => {
+    if (!textTransformerRef.current) return
+    const node = textRefs.current.get(selectedId ?? '')
+    textTransformerRef.current.nodes(node ? [node] : [])
+    textTransformerRef.current.getLayer()?.batchDraw()
+  }, [selectedId])
 
   // ── Text helpers ──
   const updateText = (id: string, patch: Partial<TextItem>) => {
@@ -751,6 +761,10 @@ export default function App() {
                     <Text
                       key={t.id}
                       id={t.id}
+                      ref={node => {
+                        if (node) textRefs.current.set(t.id, node)
+                        else textRefs.current.delete(t.id)
+                      }}
                       text={t.text}
                       x={t.x}
                       y={t.y}
@@ -765,24 +779,43 @@ export default function App() {
                       onClick={() => { setSelectedId(t.id); setSelectedImageId(null) }}
                       onTap={() => { setSelectedId(t.id); setSelectedImageId(null) }}
                       onDragEnd={e => updateText(t.id, { x: e.target.x(), y: e.target.y() })}
-                      shadowEnabled={t.shadowEnabled || selectedId === t.id}
-                      shadowColor={t.shadowEnabled ? t.shadowColor : '#6366f1'}
-                      shadowBlur={t.shadowEnabled ? t.shadowBlur : (selectedId === t.id ? 14 / scale : 0)}
+                      onTransformEnd={() => {
+                        const node = textRefs.current.get(t.id)
+                        if (!node) return
+                        const newWidth = Math.max(80, Math.abs(node.width() * node.scaleX()))
+                        updateText(t.id, { x: node.x(), y: node.y(), width: newWidth })
+                        node.scaleX(1)
+                        node.scaleY(1)
+                      }}
+                      shadowEnabled={t.shadowEnabled}
+                      shadowColor={t.shadowEnabled ? t.shadowColor : '#000000'}
+                      shadowBlur={t.shadowEnabled ? t.shadowBlur : 0}
                       shadowOffsetX={t.shadowEnabled ? t.shadowOffsetX : 0}
                       shadowOffsetY={t.shadowEnabled ? t.shadowOffsetY : 0}
-                      shadowOpacity={t.shadowEnabled ? 0.85 : (selectedId === t.id ? 0.9 : 0)}
+                      shadowOpacity={t.shadowEnabled ? 0.85 : 0}
                       stroke={t.outlineWidth > 0 ? t.outlineColor : undefined}
                       strokeWidth={t.outlineWidth > 0 ? t.outlineWidth : 0}
                       fillAfterStrokeEnabled={t.outlineWidth > 0}
                     />
                   ))}
 
+                  {/* Transformer for image objects */}
                   <Transformer
                     ref={transformerRef}
                     rotateEnabled={false}
                     keepRatio={false}
                     boundBoxFunc={(oldBox, newBox) => {
                       if (newBox.width < 20 || newBox.height < 20) return oldBox
+                      return newBox
+                    }}
+                  />
+                  {/* Transformer for text objects — width-only (left/right handles) */}
+                  <Transformer
+                    ref={textTransformerRef}
+                    rotateEnabled={false}
+                    enabledAnchors={['middle-left', 'middle-right']}
+                    boundBoxFunc={(oldBox, newBox) => {
+                      if (newBox.width < 80) return oldBox
                       return newBox
                     }}
                   />
