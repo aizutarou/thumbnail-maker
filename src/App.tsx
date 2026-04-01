@@ -105,6 +105,15 @@ export default function App() {
     }
   }, [texts, bgColor, bgGradient, preset.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Force-save on page close / reload (timer may still be pending) ──
+  useEffect(() => {
+    const handler = () => {
+      saveState({ texts, bgColor, bgGradient, presetId: preset.id, savedAt: new Date().toISOString() })
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [texts, bgColor, bgGradient, preset.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleRestore = () => {
     if (!restoreData) return
     const p = SIZE_PRESETS.find(p => p.id === restoreData.presetId) ?? SIZE_PRESETS[0]
