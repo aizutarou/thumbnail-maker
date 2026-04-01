@@ -392,6 +392,20 @@ export default function App() {
 
       <div className="workspace">
 
+        {/* ── Desktop Sidebar ── */}
+        <nav className="sidebar">
+          {MOBILE_TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`sidebar-item ${mobileTab === tab.id ? 'active' : ''}`}
+              onClick={() => setMobileTab(tab.id)}
+            >
+              <span className="sidebar-icon">{tab.icon}</span>
+              <span className="sidebar-label">{tab.label}</span>
+            </button>
+          ))}
+        </nav>
+
         {/* ── Mobile Tab Bar ── */}
         <nav className="mobile-tabs">
           {MOBILE_TABS.map(tab => (
@@ -406,7 +420,7 @@ export default function App() {
           ))}
         </nav>
 
-        {/* ── Left Control Panel ── */}
+        {/* ── Panel Content ── */}
         <aside className="control-panel" data-tab={mobileTab}>
 
           {/* Template Gallery */}
@@ -443,20 +457,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-          </section>
-
-          {/* Size Preset */}
-          <section className="panel-section s-bg">
-            <h2>サイズ</h2>
-            <select
-              className="select"
-              value={preset.id}
-              onChange={e => handlePresetChange(e.target.value)}
-            >
-              {SIZE_PRESETS.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
           </section>
 
           {/* Background */}
@@ -789,7 +789,15 @@ export default function App() {
 
           {/* ── Export Bar ── */}
           <div className="export-bar">
-            <span className="preset-badge">{preset.width} × {preset.height} px</span>
+            <select
+              className="select select-sm export-size-select"
+              value={preset.id}
+              onChange={e => handlePresetChange(e.target.value)}
+            >
+              {SIZE_PRESETS.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
             <button className="btn-download" onClick={handleDownload}>
               ⬇ PNG でダウンロード
             </button>

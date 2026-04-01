@@ -158,6 +158,46 @@
 }
 
 /* ══════════════════════════════════════════════
+   Desktop Sidebar
+══════════════════════════════════════════════ */
+.sidebar {
+  width: 68px;
+  flex-shrink: 0;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 2px;
+  z-index: 1;
+}
+.sidebar-item {
+  width: 56px;
+  padding: 9px 4px 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.sidebar-item:hover { background: #e2e8f0; }
+.sidebar-item.active { background: #eef2ff; }
+.sidebar-icon { font-size: 20px; line-height: 1; }
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+.sidebar-item.active .sidebar-label { color: #6366f1; }
+
+/* ══════════════════════════════════════════════
    Mobile Tab Bar (hidden on desktop)
 ══════════════════════════════════════════════ */
 .mobile-tabs {
@@ -165,10 +205,10 @@
 }
 
 /* ══════════════════════════════════════════════
-   Left Control Panel
+   Panel Content
 ══════════════════════════════════════════════ */
 .control-panel {
-  width: 304px;
+  width: 260px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
@@ -176,6 +216,13 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Desktop: show only active panel section */
+.control-panel[data-tab="template"] .panel-section:not(.s-template),
+.control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
+.control-panel[data-tab="text"]     .panel-section:not(.s-text) {
+  display: none;
 }
 .control-panel::-webkit-scrollbar { width: 4px; }
 .control-panel::-webkit-scrollbar-thumb {
@@ -548,12 +595,10 @@
   flex-wrap: wrap;
   justify-content: center;
 }
-.preset-badge {
-  font-size: 11px;
-  color: #94a3b8;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+.export-size-select {
+  height: 38px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.9);
 }
 
 /* ══════════════════════════════════════════════
@@ -619,7 +664,7 @@
    Responsive — Tablet (768px ~ 1023px)
 ══════════════════════════════════════════════ */
 @media (max-width: 1023px) {
-  .control-panel { width: 256px; }
+  .control-panel { width: 240px; }
   .header-sub    { display: none; }
 }
 
@@ -691,7 +736,10 @@
   .mobile-tab-icon  { font-size: 20px; line-height: 1; }
   .mobile-tab-label { font-size: 10px; font-weight: 600; }
 
-  /* Show only active tab's sections */
+  /* Hide desktop sidebar on mobile */
+  .sidebar { display: none; }
+
+  /* Show only active tab's sections (mobile overrides desktop rule) */
   .control-panel[data-tab="template"] .panel-section:not(.s-template),
   .control-panel[data-tab="bg"]       .panel-section:not(.s-bg),
   .control-panel[data-tab="text"]     .panel-section:not(.s-text) {
