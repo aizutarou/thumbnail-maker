@@ -9,11 +9,11 @@ import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
 const SIZE_PRESETS: SizePreset[] = [
-  { id: 'ogp',     name: 'OGP          1200×630',  width: 1200, height: 630  },
-  { id: 'youtube', name: 'YouTube      1280×720',  width: 1280, height: 720  },
-  { id: 'twitter', name: 'X/Twitter   1200×675',  width: 1200, height: 675  },
-  { id: 'note',    name: 'note         1280×670',  width: 1280, height: 670  },
-  { id: 'square',  name: 'Instagram    1080×1080', width: 1080, height: 1080 },
+  { id: 'ogp',     name: 'OGP',       width: 1200, height: 630  },
+  { id: 'youtube', name: 'YouTube',   width: 1280, height: 720  },
+  { id: 'twitter', name: 'X/Twitter', width: 1200, height: 675  },
+  { id: 'note',    name: 'note',      width: 1280, height: 670  },
+  { id: 'square',  name: 'Instagram', width: 1080, height: 1080 },
 ]
 
 const FONT_FAMILIES = [
@@ -650,7 +650,10 @@ export default function App() {
 
         </aside>
 
-        {/* ── Right Canvas Preview ── */}
+        {/* ── Right: Canvas + Export ── */}
+        <div className="canvas-column">
+
+        {/* Canvas Preview */}
         <main className="preview-area" ref={previewRef}>
           <div
             className="canvas-wrapper"
@@ -702,18 +705,24 @@ export default function App() {
             </Stage>
           </div>
           <p className="canvas-hint">テキストはドラッグで移動 • クリックで選択</p>
+        </main>
 
-          {/* ── Export Bar ── */}
-          <div className="export-bar">
-            <select
-              className="select select-sm export-size-select"
-              value={preset.id}
-              onChange={e => handlePresetChange(e.target.value)}
-            >
-              {SIZE_PRESETS.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+        {/* ── Export Bar (outside preview-area) ── */}
+        <div className="export-bar">
+          {/* Size presets */}
+          <div className="size-presets">
+            {SIZE_PRESETS.map(p => (
+              <button
+                key={p.id}
+                className={`size-preset-btn ${preset.id === p.id ? 'active' : ''}`}
+                onClick={() => handlePresetChange(p.id)}
+              >
+                <span className="size-preset-name">{p.name.split(/\s+/)[0]}</span>
+                <span className="size-preset-dim">{p.width}×{p.height}</span>
+              </button>
+            ))}
+          </div>
+          <div className="export-actions">
             <button className="btn-download" onClick={handleDownload}>
               ⬇ PNG でダウンロード
             </button>
@@ -721,7 +730,9 @@ export default function App() {
               𝕏 でシェアする
             </button>
           </div>
-        </main>
+        </div>
+
+        </div>{/* /canvas-column */}
 
       </div>
 
