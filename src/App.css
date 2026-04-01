@@ -204,6 +204,12 @@
   align-items: center;
   justify-content: space-between;
 }
+.section-note {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
 
 /* ══════════════════════════════════════════════
    Template Gallery

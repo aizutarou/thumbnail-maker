@@ -33,7 +33,7 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
 ]
 
 const MOBILE_TABS: { id: MobileTab; label: string; icon: string }[] = [
-  { id: 'template', label: 'テンプレ', icon: '🎨' },
+  { id: 'template', label: 'レイアウト', icon: '🎨' },
   { id: 'bg',       label: '背景',     icon: '🖼'  },
   { id: 'text',     label: 'テキスト', icon: 'T'  },
 ]
@@ -254,14 +254,11 @@ export default function App() {
     setTexts(prev => prev.map(t => ({ ...t, width: next.width - 120 })))
   }
 
-  // ── Template apply ──
+  // ── Template apply (layout only — background is preserved) ──
   const handleApplyTemplate = (templateId: string) => {
     recordHistory()
     const tmpl = TEMPLATES.find(t => t.id === templateId)!
     const result = applyTemplate(tmpl, preset)
-    setBgColor(result.bgColor)
-    setBgGradient(result.bgGradient)
-    setBgImageUrl(null)
     setTexts(result.texts)
     setSelectedId(null)
     setActiveTemplate(templateId)
@@ -414,7 +411,10 @@ export default function App() {
 
           {/* Template Gallery */}
           <section className="panel-section s-template">
-            <h2>テンプレート</h2>
+            <div className="section-header">
+              <h2>レイアウト</h2>
+            </div>
+            <p className="section-note">テキストの配置のみ適用。背景はそのまま保持されます。</p>
             <div className="tmpl-grid">
               {TEMPLATES.map(t => (
                 <button
