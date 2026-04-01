@@ -78,6 +78,9 @@ export default function App() {
   const [images,          setImages]          = useState<ImageItem[]>([])
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
   const [pendingImages,   setPendingImages]   = useState<ImageItem[]>([])
+  // Mobile-only tab navigation
+  type MobileTab = 'bg' | 'images' | 'text'
+  const [mobileTab, setMobileTab] = useState<MobileTab>('bg')
   // Force re-render when a new HTMLImageElement finishes loading
   const [, forceUpdate] = useState(0)
   const imagesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -445,7 +448,22 @@ export default function App() {
       <div className="workspace">
 
         {/* ── Control Panel ── */}
-        <aside className="control-panel">
+        <aside className="control-panel" data-mobile-tab={mobileTab}>
+
+          {/* Mobile-only tab bar */}
+          <div className="mobile-tabs">
+            {([
+              { id: 'bg',     label: '背景' },
+              { id: 'images', label: '画像' },
+              { id: 'text',   label: 'テキスト' },
+            ] as { id: MobileTab; label: string }[]).map(tab => (
+              <button
+                key={tab.id}
+                className={`mobile-tab-btn ${mobileTab === tab.id ? 'active' : ''}`}
+                onClick={() => setMobileTab(tab.id)}
+              >{tab.label}</button>
+            ))}
+          </div>
 
           {/* Background */}
           <section className="panel-section s-bg">

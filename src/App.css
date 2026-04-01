@@ -691,6 +691,11 @@
 }
 
 /* ══════════════════════════════════════════════
+   Mobile Tab Bar (hidden on desktop)
+══════════════════════════════════════════════ */
+.mobile-tabs { display: none; }
+
+/* ══════════════════════════════════════════════
    Responsive — Mobile (< 768px)
 ══════════════════════════════════════════════ */
 @media (max-width: 767px) {
@@ -736,7 +741,42 @@
     border-top: 1px solid #e2e8f0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
   }
+
+  /* Mobile tab bar */
+  .mobile-tabs {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid #e2e8f0;
+    background: #fff;
+  }
+  .mobile-tab-btn {
+    flex: 1;
+    height: 42px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .mobile-tab-btn.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+
+  /* Show only the active section on mobile */
+  .control-panel[data-mobile-tab="bg"]     .s-images,
+  .control-panel[data-mobile-tab="bg"]     .s-text   { display: none; }
+  .control-panel[data-mobile-tab="images"] .s-bg,
+  .control-panel[data-mobile-tab="images"] .s-text   { display: none; }
+  .control-panel[data-mobile-tab="text"]   .s-bg,
+  .control-panel[data-mobile-tab="text"]   .s-images { display: none; }
 
   /* Touch targets — 44px minimum (Apple HIG) */
   .btn-small       { min-height: 36px; font-size: 12px; }
