@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Konva from 'konva'
-import { Stage, Layer, Rect, Text, Image as KonvaImage } from 'react-konva'
+import { Stage, Layer, Rect, Text, Image as KonvaImage, Transformer } from 'react-konva'
 import { getGradientPoints } from './templates'
-import type { TextItem, SizePreset, BGGradient, Align, GradientAngle, HistorySnapshot } from './types'
+import type { TextItem, ImageItem, SizePreset, BGGradient, Align, GradientAngle, HistorySnapshot } from './types'
 import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
 import type { SavedState } from './storage'
 import './App.css'
@@ -58,40 +58,42 @@ function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextIt
 
 // ── Component ──────────────────────────────────────────────────────
 export default function App() {
-  const stageRef   = useRef<Konva.Stage>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const stageRef        = useRef<Konva.Stage>(null)
+  const previewRef      = useRef<HTMLDivElement>(null)
+  const imageRefs       = useRef<Map<string, Konva.Image>>(new Map())
+  const transformerRef  = useRef<Konva.Transformer>(null)
+  const loadedImagesRef = useRef<Map<string, HTMLImageElement>>(new Map())
 
   const [preset,     setPreset]     = useState<SizePreset>(SIZE_PRESETS[0])
   const [bgColor,    setBgColor]    = useState('#1a1a2e')
   const [bgGradient, setBgGradient] = useState<BGGradient | null>(null)
-  const [bgImage,    setBgImage]    = useState<HTMLImageElement | null>(null)
-  const [bgImageUrl, setBgImageUrl] = useState<string | null>(null)
-  const [bgOverlay,  setBgOverlay]  = useState(0)
   const [scale,      setScale]      = useState(0.5)
 
-  const [texts,      setTexts]      = useState<TextItem[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [texts,           setTexts]           = useState<TextItem[]>([])
+  const [selectedId,      setSelectedId]      = useState<string | null>(null)
+  const [images,          setImages]          = useState<ImageItem[]>([])
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
+  // Force re-render when a new HTMLImageElement finishes loading
+  const [, forceUpdate] = useState(0)
 
   // ── Auto-save & Restore ──
   type SaveStatus = 'idle' | 'saving' | 'saved'
-  const [saveStatus,        setSaveStatus]        = useState<SaveStatus>('idle')
-  const [restoreData,       setRestoreData]       = useState<SavedState | null>(null)
+  const [saveStatus,  setSaveStatus]  = useState<SaveStatus>('idle')
+  const [restoreData, setRestoreData] = useState<SavedState | null>(null)
   const saveTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Check for saved state on mount
   useEffect(() => {
     const saved = loadSavedState()
     if (saved) setRestoreData(saved)
   }, [])
 
-  // Debounced auto-save (1.5s after last change)
   useEffect(() => {
     if (saveTimerRef.current)  clearTimeout(saveTimerRef.current)
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
     setSaveStatus('saving')
     saveTimerRef.current = setTimeout(() => {
-      saveState({ texts, bgColor, bgGradient, bgOverlay, presetId: preset.id, savedAt: new Date().toISOString() })
+      saveState({ texts, bgColor, bgGradient, presetId: preset.id, savedAt: new Date().toISOString() })
       setSaveStatus('saved')
       savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2500)
     }, 1500)
@@ -107,9 +109,7 @@ export default function App() {
     setPreset(p)
     setBgColor(restoreData.bgColor)
     setBgGradient(restoreData.bgGradient)
-    setBgOverlay(restoreData.bgOverlay ?? 0)
     setTexts(restoreData.texts)
-    setBgImageUrl(null)
     setRestoreData(null)
   }
 
@@ -129,9 +129,7 @@ export default function App() {
     texts: JSON.parse(JSON.stringify(texts)),
     bgColor,
     bgGradient: bgGradient ? { ...bgGradient } : null,
-    bgImageUrl,
-    bgOverlay,
-  }), [texts, bgColor, bgGradient, bgImageUrl, bgOverlay])
+  }), [texts, bgColor, bgGradient])
 
   const recordHistory = useCallback(() => {
     const snap = captureSnapshot()
@@ -143,8 +141,6 @@ export default function App() {
     setTexts(snap.texts)
     setBgColor(snap.bgColor)
     setBgGradient(snap.bgGradient)
-    setBgImageUrl(snap.bgImageUrl)
-    setBgOverlay(snap.bgOverlay ?? 0)
   }
 
   const handleUndo = useCallback(() => {
@@ -164,14 +160,6 @@ export default function App() {
     setHistoryPast(p => [...p, cur])
     restoreSnapshot(next)
   }, [historyFuture, captureSnapshot])
-
-  // ── bgImageUrl → HTMLImageElement ──
-  useEffect(() => {
-    if (!bgImageUrl) { setBgImage(null); return }
-    const img = new window.Image()
-    img.onload = () => setBgImage(img)
-    img.src = bgImageUrl
-  }, [bgImageUrl])
 
   // ── Keyboard shortcuts: Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z ──
   useEffect(() => {
@@ -199,7 +187,14 @@ export default function App() {
     return () => window.removeEventListener('resize', updateScale)
   }, [updateScale])
 
-  // ── Derived ──
+  // ── Attach transformer to selected image ──
+  useEffect(() => {
+    if (!transformerRef.current) return
+    const node = imageRefs.current.get(selectedImageId ?? '')
+    transformerRef.current.nodes(node ? [node] : [])
+    transformerRef.current.getLayer()?.batchDraw()
+  }, [selectedImageId])
+
   // ── Text helpers ──
   const updateText = (id: string, patch: Partial<TextItem>) => {
     recordHistory()
@@ -211,6 +206,7 @@ export default function App() {
     const item = makeText(preset, { y: 80 + texts.length * 90 })
     setTexts(prev => [...prev, item])
     setSelectedId(item.id)
+    setSelectedImageId(null)
   }
 
   const removeText = (id: string) => {
@@ -231,30 +227,56 @@ export default function App() {
     }
     setTexts(prev => [...prev, copy])
     setSelectedId(copy.id)
+    setSelectedImageId(null)
   }
 
+  // ── Image helpers ──
+  const addImage = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = ev => {
+      const url = ev.target?.result as string
+      const el = new window.Image()
+      el.onload = () => {
+        const maxW = preset.width  * 0.6
+        const maxH = preset.height * 0.6
+        const s = Math.min(maxW / el.width, maxH / el.height, 1)
+        const item: ImageItem = {
+          id: `img-${Date.now()}`,
+          url,
+          x: Math.round((preset.width  - el.width  * s) / 2),
+          y: Math.round((preset.height - el.height * s) / 2),
+          width:  Math.round(el.width  * s),
+          height: Math.round(el.height * s),
+          opacity: 1,
+        }
+        loadedImagesRef.current.set(item.id, el)
+        setImages(prev => [...prev, item])
+        setSelectedImageId(item.id)
+        setSelectedId(null)
+        forceUpdate(n => n + 1)
+      }
+      el.src = url
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeImage = (id: string) => {
+    loadedImagesRef.current.delete(id)
+    imageRefs.current.delete(id)
+    setImages(prev => prev.filter(img => img.id !== id))
+    if (selectedImageId === id) setSelectedImageId(null)
+  }
+
+  const updateImage = (id: string, patch: Partial<ImageItem>) => {
+    setImages(prev => prev.map(img => img.id === id ? { ...img, ...patch } : img))
+  }
 
   // ── Preset change ──
   const handlePresetChange = (id: string) => {
     recordHistory()
     const next = SIZE_PRESETS.find(p => p.id === id)!
     setPreset(next)
-    setBgImageUrl(null)
     setTexts(prev => prev.map(t => ({ ...t, width: next.width - 120 })))
-  }
-
-  // ── Background image upload ──
-  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => {
-      recordHistory()
-      setBgImageUrl(ev.target?.result as string)
-      setBgGradient(null)
-    }
-    reader.readAsDataURL(file)
-    e.target.value = ''
   }
 
   // ── Share on X ──
@@ -265,14 +287,22 @@ export default function App() {
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=${tags}`, '_blank', 'noopener')
   }
 
-  // ── PNG Download ──
+  // ── PNG Download (deselect first to hide transformer handles) ──
   const handleDownload = () => {
     if (!stageRef.current) return
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 / scale })
-    const a = document.createElement('a')
-    a.download = `thumbnail-${preset.id}.png`
-    a.href = uri
-    a.click()
+    const prevTextId  = selectedId
+    const prevImageId = selectedImageId
+    setSelectedId(null)
+    setSelectedImageId(null)
+    setTimeout(() => {
+      const uri = stageRef.current!.toDataURL({ pixelRatio: 2 / scale })
+      const a = document.createElement('a')
+      a.download = `thumbnail-${preset.id}.png`
+      a.href = uri
+      a.click()
+      setSelectedId(prevTextId)
+      setSelectedImageId(prevImageId)
+    }, 50)
   }
 
   // ── fontStyle string for Konva ──
@@ -283,30 +313,8 @@ export default function App() {
     return 'normal'
   }
 
-  // ── Gradient background rendering ──
+  // ── Background rendering ──
   const renderBackground = () => {
-    if (bgImage) {
-      return (
-        <>
-          <KonvaImage
-            image={bgImage}
-            x={0} y={0}
-            width={preset.width}
-            height={preset.height}
-          />
-          {bgOverlay > 0 && (
-            <Rect
-              x={0} y={0}
-              width={preset.width}
-              height={preset.height}
-              fill="#000000"
-              opacity={bgOverlay / 100}
-              listening={false}
-            />
-          )}
-        </>
-      )
-    }
     if (bgGradient) {
       const pts = getGradientPoints(bgGradient.angle, preset.width, preset.height)
       return (
@@ -378,26 +386,23 @@ export default function App() {
           <section className="panel-section s-bg">
             <h2>背景</h2>
 
-            {/* Type toggle */}
             <div className="control-row">
               <label>種類</label>
               <div className="bg-type-group">
                 <button
-                  className={`btn-toggle ${!bgGradient && !bgImage ? 'active' : ''}`}
-                  onClick={() => { setBgGradient(null); setBgImage(null) }}
+                  className={`btn-toggle ${!bgGradient ? 'active' : ''}`}
+                  onClick={() => setBgGradient(null)}
                 >単色</button>
                 <button
                   className={`btn-toggle ${!!bgGradient ? 'active' : ''}`}
                   onClick={() => {
                     if (!bgGradient) setBgGradient({ from: bgColor, to: '#7c3aed', angle: 'to-bottom-right' })
-                    setBgImageUrl(null)
                   }}
                 >グラデーション</button>
               </div>
             </div>
 
-            {/* Solid color */}
-            {!bgGradient && !bgImage && (
+            {!bgGradient && (
               <div className="control-row">
                 <label>背景色</label>
                 <input
@@ -410,7 +415,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Gradient controls */}
             {bgGradient && (
               <div className="gradient-controls">
                 <div className="control-row">
@@ -447,45 +451,75 @@ export default function App() {
                 </div>
               </div>
             )}
+          </section>
 
-            {/* Background image */}
-            <div className="control-row">
-              <label>画像</label>
-              <label className="file-upload-btn">
-                {bgImage ? '画像を変更' : '画像を選択'}
+          {/* Images */}
+          <section className="panel-section s-images">
+            <div className="section-header">
+              <h2>画像</h2>
+              <label className="btn-small btn-primary file-upload-btn">
+                ＋ 追加
                 <input
                   type="file"
                   accept="image/*"
                   style={{ display: 'none' }}
-                  onChange={handleBgUpload}
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file) addImage(file)
+                    e.target.value = ''
+                  }}
                 />
               </label>
-              {bgImage && (
-                <button className="btn-small btn-danger" onClick={() => { recordHistory(); setBgImageUrl(null); setBgOverlay(0) }}>
-                  削除
-                </button>
-              )}
             </div>
 
-            {/* Overlay slider — only shown when bg image is set */}
-            {bgImage && (
-              <div className="control-row">
-                <label>暗さ</label>
-                <input
-                  type="range"
-                  className="range"
-                  min={0} max={90}
-                  value={bgOverlay}
-                  onChange={e => setBgOverlay(Number(e.target.value))}
-                />
-                <span className="value-badge">{bgOverlay}%</span>
-              </div>
+            {images.length === 0 && (
+              <p className="empty-hint">画像をアップロードすると<br />キャンバス上に配置できます</p>
             )}
+
+            <div className="image-list">
+              {images.map((img, idx) => (
+                <div
+                  key={img.id}
+                  className={`image-accordion ${selectedImageId === img.id ? 'open' : ''}`}
+                >
+                  <div
+                    className="image-accordion-header"
+                    onClick={() => {
+                      setSelectedImageId(selectedImageId === img.id ? null : img.id)
+                      setSelectedId(null)
+                    }}
+                  >
+                    <span className="accordion-arrow">{selectedImageId === img.id ? '▼' : '▶'}</span>
+                    <span className="image-thumb-label">画像 {idx + 1}</span>
+                    <button
+                      className="btn-icon btn-danger"
+                      title="削除"
+                      onClick={e => { e.stopPropagation(); removeImage(img.id) }}
+                    >✕</button>
+                  </div>
+
+                  {selectedImageId === img.id && (
+                    <div className="image-accordion-body">
+                      <div className="control-row">
+                        <label>不透明度</label>
+                        <input
+                          type="range"
+                          className="range"
+                          min={0.1} max={1} step={0.05}
+                          value={img.opacity}
+                          onChange={e => updateImage(img.id, { opacity: Number(e.target.value) })}
+                        />
+                        <span className="value-badge">{Math.round(img.opacity * 100)}%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Text */}
           <section className="panel-section s-text">
-
             <div className="section-header">
               <h2>テキスト</h2>
               <button className="btn-small btn-primary" onClick={addText}>＋ 追加</button>
@@ -494,10 +528,12 @@ export default function App() {
               {texts.map(t => (
                 <div key={t.id} className={`text-accordion ${selectedId === t.id ? 'open' : ''}`}>
 
-                  {/* ── Header row (always visible) ── */}
                   <div
                     className="text-accordion-header"
-                    onClick={() => setSelectedId(selectedId === t.id ? null : t.id)}
+                    onClick={() => {
+                      setSelectedId(selectedId === t.id ? null : t.id)
+                      setSelectedImageId(null)
+                    }}
                   >
                     <span className="accordion-arrow">{selectedId === t.id ? '▼' : '▶'}</span>
                     <span className="text-preview">
@@ -515,7 +551,6 @@ export default function App() {
                     >✕</button>
                   </div>
 
-                  {/* ── Editing controls (visible when open) ── */}
                   {selectedId === t.id && (
                     <div className="text-accordion-body">
 
@@ -653,84 +688,133 @@ export default function App() {
         {/* ── Right: Canvas + Export ── */}
         <div className="canvas-column">
 
-        {/* Canvas Preview */}
-        <main className="preview-area" ref={previewRef}>
-          <div
-            className="canvas-wrapper"
-            style={{ width: preset.width * scale, height: preset.height * scale }}
-          >
-            <Stage
-              ref={stageRef}
-              width={preset.width * scale}
-              height={preset.height * scale}
-              scaleX={scale}
-              scaleY={scale}
-              onMouseDown={e => {
-                if (e.target === e.target.getStage()) setSelectedId(null)
-              }}
+          <main className="preview-area" ref={previewRef}>
+            <div
+              className="canvas-wrapper"
+              style={{ width: preset.width * scale, height: preset.height * scale }}
             >
-              <Layer>
-                {renderBackground()}
-
-                {texts.map(t => (
-                  <Text
-                    key={t.id}
-                    id={t.id}
-                    text={t.text}
-                    x={t.x}
-                    y={t.y}
-                    width={t.width}
-                    fontSize={t.fontSize}
-                    fill={t.color}
-                    fontFamily={t.fontFamily}
-                    fontStyle={fontStyle(t)}
-                    align={t.align}
-                    lineHeight={1.3}
-                    draggable
-                    onClick={() => setSelectedId(t.id)}
-                    onTap={() => setSelectedId(t.id)}
-                    onDragEnd={e => updateText(t.id, { x: e.target.x(), y: e.target.y() })}
-                    shadowEnabled={t.shadowEnabled || selectedId === t.id}
-                    shadowColor={t.shadowEnabled ? t.shadowColor : '#6366f1'}
-                    shadowBlur={t.shadowEnabled ? t.shadowBlur : (selectedId === t.id ? 14 / scale : 0)}
-                    shadowOffsetX={t.shadowEnabled ? t.shadowOffsetX : 0}
-                    shadowOffsetY={t.shadowEnabled ? t.shadowOffsetY : 0}
-                    shadowOpacity={t.shadowEnabled ? 0.85 : (selectedId === t.id ? 0.9 : 0)}
-                    stroke={t.outlineWidth > 0 ? t.outlineColor : undefined}
-                    strokeWidth={t.outlineWidth > 0 ? t.outlineWidth : 0}
-                    fillAfterStrokeEnabled={t.outlineWidth > 0}
-                  />
-                ))}
-              </Layer>
-            </Stage>
-          </div>
-          <p className="canvas-hint">テキストはドラッグで移動 • クリックで選択</p>
-        </main>
-
-        {/* ── Export Bar (outside preview-area) ── */}
-        <div className="export-bar">
-          {/* Size presets */}
-          <div className="size-presets">
-            {SIZE_PRESETS.map(p => (
-              <button
-                key={p.id}
-                className={`size-preset-btn ${preset.id === p.id ? 'active' : ''}`}
-                onClick={() => handlePresetChange(p.id)}
+              <Stage
+                ref={stageRef}
+                width={preset.width * scale}
+                height={preset.height * scale}
+                scaleX={scale}
+                scaleY={scale}
+                onMouseDown={e => {
+                  if (e.target === e.target.getStage()) {
+                    setSelectedId(null)
+                    setSelectedImageId(null)
+                  }
+                }}
               >
-                <span className="size-preset-name">{p.name.split(/\s+/)[0]}</span>
-                <span className="size-preset-dim">{p.width}×{p.height}</span>
+                <Layer>
+                  {renderBackground()}
+
+                  {/* Image objects — rendered below text */}
+                  {images.map(img => {
+                    const el = loadedImagesRef.current.get(img.id)
+                    if (!el) return null
+                    return (
+                      <KonvaImage
+                        key={img.id}
+                        ref={node => {
+                          if (node) imageRefs.current.set(img.id, node)
+                          else imageRefs.current.delete(img.id)
+                        }}
+                        image={el}
+                        x={img.x}
+                        y={img.y}
+                        width={img.width}
+                        height={img.height}
+                        opacity={img.opacity}
+                        draggable
+                        onClick={() => { setSelectedImageId(img.id); setSelectedId(null) }}
+                        onTap={() => { setSelectedImageId(img.id); setSelectedId(null) }}
+                        onDragEnd={e => updateImage(img.id, { x: e.target.x(), y: e.target.y() })}
+                        onTransformEnd={() => {
+                          const node = imageRefs.current.get(img.id)
+                          if (!node) return
+                          updateImage(img.id, {
+                            x: node.x(),
+                            y: node.y(),
+                            width:  Math.abs(node.width()  * node.scaleX()),
+                            height: Math.abs(node.height() * node.scaleY()),
+                          })
+                          node.scaleX(1)
+                          node.scaleY(1)
+                        }}
+                      />
+                    )
+                  })}
+
+                  {/* Text objects */}
+                  {texts.map(t => (
+                    <Text
+                      key={t.id}
+                      id={t.id}
+                      text={t.text}
+                      x={t.x}
+                      y={t.y}
+                      width={t.width}
+                      fontSize={t.fontSize}
+                      fill={t.color}
+                      fontFamily={t.fontFamily}
+                      fontStyle={fontStyle(t)}
+                      align={t.align}
+                      lineHeight={1.3}
+                      draggable
+                      onClick={() => { setSelectedId(t.id); setSelectedImageId(null) }}
+                      onTap={() => { setSelectedId(t.id); setSelectedImageId(null) }}
+                      onDragEnd={e => updateText(t.id, { x: e.target.x(), y: e.target.y() })}
+                      shadowEnabled={t.shadowEnabled || selectedId === t.id}
+                      shadowColor={t.shadowEnabled ? t.shadowColor : '#6366f1'}
+                      shadowBlur={t.shadowEnabled ? t.shadowBlur : (selectedId === t.id ? 14 / scale : 0)}
+                      shadowOffsetX={t.shadowEnabled ? t.shadowOffsetX : 0}
+                      shadowOffsetY={t.shadowEnabled ? t.shadowOffsetY : 0}
+                      shadowOpacity={t.shadowEnabled ? 0.85 : (selectedId === t.id ? 0.9 : 0)}
+                      stroke={t.outlineWidth > 0 ? t.outlineColor : undefined}
+                      strokeWidth={t.outlineWidth > 0 ? t.outlineWidth : 0}
+                      fillAfterStrokeEnabled={t.outlineWidth > 0}
+                    />
+                  ))}
+
+                  <Transformer
+                    ref={transformerRef}
+                    rotateEnabled={false}
+                    keepRatio={false}
+                    boundBoxFunc={(oldBox, newBox) => {
+                      if (newBox.width < 20 || newBox.height < 20) return oldBox
+                      return newBox
+                    }}
+                  />
+                </Layer>
+              </Stage>
+            </div>
+            <p className="canvas-hint">テキスト・画像はドラッグで移動 • 画像は角をドラッグでリサイズ</p>
+          </main>
+
+          {/* ── Export Bar ── */}
+          <div className="export-bar">
+            <div className="size-presets">
+              {SIZE_PRESETS.map(p => (
+                <button
+                  key={p.id}
+                  className={`size-preset-btn ${preset.id === p.id ? 'active' : ''}`}
+                  onClick={() => handlePresetChange(p.id)}
+                >
+                  <span className="size-preset-name">{p.name.split(/\s+/)[0]}</span>
+                  <span className="size-preset-dim">{p.width}×{p.height}</span>
+                </button>
+              ))}
+            </div>
+            <div className="export-actions">
+              <button className="btn-download" onClick={handleDownload}>
+                ⬇ PNG でダウンロード
               </button>
-            ))}
+              <button className="btn-share" onClick={handleShare}>
+                𝕏 でシェアする
+              </button>
+            </div>
           </div>
-          <div className="export-actions">
-            <button className="btn-download" onClick={handleDownload}>
-              ⬇ PNG でダウンロード
-            </button>
-            <button className="btn-share" onClick={handleShare}>
-              𝕏 でシェアする
-            </button>
-          </div>
-        </div>
 
         </div>{/* /canvas-column */}
 

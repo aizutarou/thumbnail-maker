@@ -49,12 +49,20 @@ export interface TemplateTextDef {
   widthRatio: number
 }
 
+export interface ImageItem {
+  id: string
+  url: string
+  x: number
+  y: number
+  width: number
+  height: number
+  opacity: number
+}
+
 export interface HistorySnapshot {
   texts: TextItem[]
   bgColor: string
   bgGradient: BGGradient | null
-  bgImageUrl: string | null
-  bgOverlay: number
 }
 
 export interface TemplateDef {
