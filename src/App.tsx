@@ -5,6 +5,7 @@ import { getGradientPoints } from './templates'
 import type { TextItem, ImageItem, SizePreset, BGGradient, Align, GradientAngle, HistorySnapshot } from './types'
 import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
 import type { SavedState } from './storage'
+import { compressImage, saveImagesToDB, loadImagesFromDB, clearImagesFromDB } from './imageStorage'
 import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -75,8 +76,10 @@ export default function App() {
   const [selectedId,      setSelectedId]      = useState<string | null>(null)
   const [images,          setImages]          = useState<ImageItem[]>([])
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
+  const [pendingImages,   setPendingImages]   = useState<ImageItem[]>([])
   // Force re-render when a new HTMLImageElement finishes loading
   const [, forceUpdate] = useState(0)
+  const imagesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Auto-save & Restore ──
   type SaveStatus = 'idle' | 'saving' | 'saved'
@@ -87,7 +90,10 @@ export default function App() {
 
   useEffect(() => {
     const saved = loadSavedState()
-    if (saved) setRestoreData(saved)
+    if (saved) {
+      setRestoreData(saved)
+      loadImagesFromDB().then(setPendingImages)
+    }
   }, [])
 
   useEffect(() => {
@@ -105,14 +111,26 @@ export default function App() {
     }
   }, [texts, bgColor, bgGradient, preset.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Force-save on page close / reload (timer may still be pending) ──
+  // ── Debounce-save images to IndexedDB ──
+  useEffect(() => {
+    if (imagesSaveTimerRef.current) clearTimeout(imagesSaveTimerRef.current)
+    imagesSaveTimerRef.current = setTimeout(() => {
+      saveImagesToDB(images)
+    }, 1500)
+    return () => {
+      if (imagesSaveTimerRef.current) clearTimeout(imagesSaveTimerRef.current)
+    }
+  }, [images]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Force-save on page close / reload (timers may still be pending) ──
   useEffect(() => {
     const handler = () => {
       saveState({ texts, bgColor, bgGradient, presetId: preset.id, savedAt: new Date().toISOString() })
+      saveImagesToDB(images) // async fire-and-forget; browser usually completes IDB writes
     }
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
-  }, [texts, bgColor, bgGradient, preset.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [texts, bgColor, bgGradient, preset.id, images]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRestore = () => {
     if (!restoreData) return
@@ -121,12 +139,25 @@ export default function App() {
     setBgColor(restoreData.bgColor)
     setBgGradient(restoreData.bgGradient)
     setTexts(restoreData.texts)
+    // Restore images: load each URL into an HTMLImageElement then add to state
+    pendingImages.forEach(img => {
+      const el = new window.Image()
+      el.onload = () => {
+        loadedImagesRef.current.set(img.id, el)
+        setImages(prev => prev.find(i => i.id === img.id) ? prev : [...prev, img])
+        forceUpdate(n => n + 1)
+      }
+      el.src = img.url
+    })
     setRestoreData(null)
+    setPendingImages([])
   }
 
   const handleDismissRestore = () => {
     clearSavedState()
+    clearImagesFromDB()
     setRestoreData(null)
+    setPendingImages([])
   }
 
   // ── History (Undo / Redo) ──
@@ -253,28 +284,35 @@ export default function App() {
   const addImage = (file: File) => {
     const reader = new FileReader()
     reader.onload = ev => {
-      const url = ev.target?.result as string
-      const el = new window.Image()
-      el.onload = () => {
+      const originalUrl = ev.target?.result as string
+      // Load original to get dimensions for initial placement
+      const orig = new window.Image()
+      orig.onload = async () => {
         const maxW = preset.width  * 0.6
         const maxH = preset.height * 0.6
-        const s = Math.min(maxW / el.width, maxH / el.height, 1)
-        const item: ImageItem = {
-          id: `img-${Date.now()}`,
-          url,
-          x: Math.round((preset.width  - el.width  * s) / 2),
-          y: Math.round((preset.height - el.height * s) / 2),
-          width:  Math.round(el.width  * s),
-          height: Math.round(el.height * s),
-          opacity: 1,
+        const s = Math.min(maxW / orig.width, maxH / orig.height, 1)
+        // Compress to max 1280px JPEG-80 for both rendering and storage
+        const compressedUrl = await compressImage(originalUrl)
+        const el = new window.Image()
+        el.onload = () => {
+          const item: ImageItem = {
+            id: `img-${Date.now()}`,
+            url: compressedUrl,
+            x: Math.round((preset.width  - orig.width  * s) / 2),
+            y: Math.round((preset.height - orig.height * s) / 2),
+            width:  Math.round(orig.width  * s),
+            height: Math.round(orig.height * s),
+            opacity: 1,
+          }
+          loadedImagesRef.current.set(item.id, el)
+          setImages(prev => [...prev, item])
+          setSelectedImageId(item.id)
+          setSelectedId(null)
+          forceUpdate(n => n + 1)
         }
-        loadedImagesRef.current.set(item.id, el)
-        setImages(prev => [...prev, item])
-        setSelectedImageId(item.id)
-        setSelectedId(null)
-        forceUpdate(n => n + 1)
+        el.src = compressedUrl
       }
-      el.src = url
+      orig.src = originalUrl
     }
     reader.readAsDataURL(file)
   }
@@ -390,6 +428,12 @@ export default function App() {
         <div className="restore-banner">
           <span className="restore-msg">
             💾 {formatTimeAgo(restoreData.savedAt)}の作業が見つかりました
+            {(restoreData.texts.length > 0 || pendingImages.length > 0) && (
+              <span className="restore-detail">
+                （テキスト {restoreData.texts.length} 件
+                {pendingImages.length > 0 && `・画像 ${pendingImages.length} 枚`}）
+              </span>
+            )}
           </span>
           <button className="btn-restore" onClick={handleRestore}>復元する</button>
           <button className="btn-dismiss" onClick={handleDismissRestore}>新しく始める</button>
