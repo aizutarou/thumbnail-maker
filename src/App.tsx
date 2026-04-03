@@ -1191,7 +1191,7 @@ export default function App() {
                 </Layer>
               </Stage>
             </div>
-            <p className="canvas-hint">テキスト・画像はドラッグで移動 • 画像は角をドラッグでリサイズ</p>
+            <p className="canvas-hint">ドラッグで移動 • 画像の角でリサイズ • テキストの角でフォントサイズ変更 • Delete で削除 • Ctrl+V で画像貼り付け</p>
           </main>
 
           {/* ── Export Bar ── */}
