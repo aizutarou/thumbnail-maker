@@ -9,15 +9,24 @@ import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
 const SIZE_PRESETS: SizePreset[] = [
-  { id: 'ogp',     name: 'OGP',       width: 1200, height: 630  },
-  { id: 'youtube', name: 'YouTube',   width: 1280, height: 720  },
-  { id: 'twitter', name: 'X/Twitter', width: 1200, height: 675  },
-  { id: 'note',    name: 'note',      width: 1280, height: 670  },
-  { id: 'square',  name: 'Instagram', width: 1080, height: 1080 },
+  { id: 'ogp',     name: 'OGP',          width: 1200, height: 630  },
+  { id: 'youtube', name: 'YouTube',      width: 1280, height: 720  },
+  { id: 'twitter', name: 'X/Twitter',   width: 1200, height: 675  },
+  { id: 'note',    name: 'note',         width: 1280, height: 670  },
+  { id: 'square',  name: 'Instagram',   width: 1080, height: 1080 },
+  { id: 'story',   name: 'Story/Shorts', width: 1080, height: 1920 },
 ]
 
 const FONT_FAMILIES = [
+  // 日本語
   'Noto Sans JP',
+  'M PLUS Rounded 1c',
+  'Dela Gothic One',
+  'Rampart One',
+  'DotGothic16',
+  'Zen Maru Gothic',
+  'Kosugi Maru',
+  // 欧文
   'serif',
   'Arial',
   'Georgia',
@@ -1230,14 +1239,14 @@ export default function App() {
                       <span className="size-preset-dim">{p.width}×{p.height}</span>
                     </button>
                   ))}
-                </div>
+      </div>
                 <div className="export-actions">
                   <button className="btn-download" onClick={handleDownload}>
                     ⬇ PNG でダウンロード
                   </button>
                   <button className="btn-share" onClick={handleShare}>
                     𝕏 でシェアする
-                  </button>
+        </button>
                 </div>
               </>
             )}
