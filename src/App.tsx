@@ -359,6 +359,10 @@ export default function App() {
     setImages(prev => prev.map(img => img.id === id ? { ...img, ...patch } : img))
   }
 
+  const fitImageToCanvas = (id: string) => {
+    updateImage(id, { x: 0, y: 0, width: preset.width, height: preset.height, rotation: 0 })
+  }
+
   // ── Preset change ──
   const handlePresetChange = (id: string) => {
     recordHistory()
@@ -611,6 +615,12 @@ export default function App() {
 
                   {selectedImageId === img.id && (
                     <div className="image-accordion-body">
+                      <button
+                        className="btn-fit-canvas"
+                        onClick={() => fitImageToCanvas(img.id)}
+                      >
+                        ⛶ 背景に引き延ばす
+                      </button>
                       <div className="control-row">
                         <label>不透明度</label>
                         <input
