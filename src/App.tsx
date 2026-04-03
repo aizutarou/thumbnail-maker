@@ -221,6 +221,18 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [handleUndo, handleRedo])
 
+  // ── Keyboard Delete / Backspace: remove selected element ──
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (selectedId)      { e.preventDefault(); removeText(selectedId) }
+      if (selectedImageId) { e.preventDefault(); removeImage(selectedImageId) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedId, selectedImageId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Keyboard arrow keys: nudge selected element ──
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -357,6 +369,28 @@ export default function App() {
 
   const updateImage = (id: string, patch: Partial<ImageItem>) => {
     setImages(prev => prev.map(img => img.id === id ? { ...img, ...patch } : img))
+  }
+
+  const moveImage = (id: string, dir: 1 | -1) => {
+    setImages(prev => {
+      const idx = prev.findIndex(img => img.id === id)
+      const next = idx + dir
+      if (next < 0 || next >= prev.length) return prev
+      const arr = [...prev]
+      ;[arr[idx], arr[next]] = [arr[next], arr[idx]]
+      return arr
+    })
+  }
+
+  const moveText = (id: string, dir: 1 | -1) => {
+    setTexts(prev => {
+      const idx = prev.findIndex(t => t.id === id)
+      const next = idx + dir
+      if (next < 0 || next >= prev.length) return prev
+      const arr = [...prev]
+      ;[arr[idx], arr[next]] = [arr[next], arr[idx]]
+      return arr
+    })
   }
 
   const fitImageToCanvas = (id: string) => {
@@ -607,6 +641,18 @@ export default function App() {
                     <span className="accordion-arrow">{selectedImageId === img.id ? '▼' : '▶'}</span>
                     <span className="image-thumb-label">画像 {idx + 1}</span>
                     <button
+                      className="btn-icon btn-layer"
+                      title="前面へ"
+                      disabled={idx === images.length - 1}
+                      onClick={e => { e.stopPropagation(); moveImage(img.id, 1) }}
+                    >↑</button>
+                    <button
+                      className="btn-icon btn-layer"
+                      title="背面へ"
+                      disabled={idx === 0}
+                      onClick={e => { e.stopPropagation(); moveImage(img.id, -1) }}
+                    >↓</button>
+                    <button
                       className="btn-icon btn-danger"
                       title="削除"
                       onClick={e => { e.stopPropagation(); removeImage(img.id) }}
@@ -669,7 +715,7 @@ export default function App() {
               <button className="btn-small btn-primary" onClick={addText}>＋ 追加</button>
             </div>
             <div className="text-list">
-              {texts.map(t => (
+              {texts.map((t, idx) => (
                 <div key={t.id} className={`text-accordion ${selectedId === t.id ? 'open' : ''}`}>
 
                   <div
@@ -683,6 +729,18 @@ export default function App() {
                     <span className="text-preview">
                       {t.text.slice(0, 15)}{t.text.length > 15 ? '…' : ''}
                     </span>
+                    <button
+                      className="btn-icon btn-layer"
+                      title="前面へ"
+                      disabled={idx === texts.length - 1}
+                      onClick={e => { e.stopPropagation(); moveText(t.id, 1) }}
+                    >↑</button>
+                    <button
+                      className="btn-icon btn-layer"
+                      title="背面へ"
+                      disabled={idx === 0}
+                      onClick={e => { e.stopPropagation(); moveText(t.id, -1) }}
+                    >↓</button>
                     <button
                       className="btn-icon btn-duplicate"
                       title="複製"

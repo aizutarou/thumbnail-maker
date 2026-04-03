@@ -388,6 +388,9 @@
 .btn-danger:hover  { background: #fecaca; }
 .btn-duplicate  { background: #e0e7ff; color: #4f46e5; font-size: 12px; }
 .btn-duplicate:hover { background: #c7d2fe; }
+.btn-layer      { background: #f1f5f9; color: #64748b; font-size: 11px; }
+.btn-layer:hover:not(:disabled) { background: #e2e8f0; color: #334155; }
+.btn-layer:disabled { opacity: 0.25; cursor: not-allowed; }
 
 .btn-icon {
   width: 22px;
