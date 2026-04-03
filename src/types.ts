@@ -37,19 +37,6 @@ export interface BGGradient {
   angle: GradientAngle
 }
 
-export interface TemplateTextDef {
-  text: string
-  xRatio: number
-  yRatio: number
-  fontSizeRatio: number
-  color: string
-  fontFamily: string
-  bold: boolean
-  italic: boolean
-  align: Align
-  widthRatio: number
-}
-
 export interface ImageItem {
   id: string
   url: string
@@ -68,12 +55,3 @@ export interface HistorySnapshot {
   bgGradient: BGGradient | null
 }
 
-export interface TemplateDef {
-  id: string
-  name: string
-  category: string
-  bgColor: string
-  bgGradient?: BGGradient
-  thumbStyle: string
-  texts: TemplateTextDef[]
-}

@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Konva from 'konva'
 import { Stage, Layer, Rect, Text, Image as KonvaImage, Transformer } from 'react-konva'
-import { getGradientPoints } from './templates'
 import type { TextItem, ImageItem, SizePreset, BGGradient, GradientAngle, HistorySnapshot } from './types'
 import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
 import type { SavedState } from './storage'
@@ -32,6 +31,16 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
   { value: 'to-bottom',       label: '縦（↓）'   },
   { value: 'to-bottom-left',  label: '斜め（↙）' },
 ]
+
+function getGradientPoints(angle: BGGradient['angle'], w: number, h: number) {
+  switch (angle) {
+    case 'to-right':        return { start: { x: 0, y: 0 }, end: { x: w, y: 0 } }
+    case 'to-bottom':       return { start: { x: 0, y: 0 }, end: { x: 0, y: h } }
+    case 'to-bottom-left':  return { start: { x: w, y: 0 }, end: { x: 0, y: h } }
+    case 'to-bottom-right':
+    default:                return { start: { x: 0, y: 0 }, end: { x: w, y: h } }
+  }
+}
 
 const BG_COLOR_PRESETS = [
   '#000000', '#ffffff', '#1a1a2e', '#0f172a',
