@@ -1091,7 +1091,7 @@ export default function App() {
                       text={t.text}
                       x={t.x}
                       y={t.y}
-                      width={t.width}
+                      width={t.width > 0 ? t.width : undefined}
                       fontSize={t.fontSize}
                       fill={t.color}
                       fontFamily={t.fontFamily}
