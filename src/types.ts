@@ -1,7 +1,5 @@
 export type Align = 'left' | 'center' | 'right'
 export type GradientAngle = 'to-right' | 'to-bottom' | 'to-bottom-right' | 'to-bottom-left'
-export type MobileTab = 'template' | 'bg' | 'text' | 'export'
-
 export interface TextItem {
   id: string
   text: string
@@ -14,6 +12,7 @@ export interface TextItem {
   italic: boolean
   align: Align
   width: number
+  rotation: number
   // Shadow
   shadowEnabled: boolean
   shadowColor: string
@@ -51,11 +50,22 @@ export interface TemplateTextDef {
   widthRatio: number
 }
 
+export interface ImageItem {
+  id: string
+  url: string
+  x: number
+  y: number
+  width: number
+  height: number
+  opacity: number
+  rotation: number
+  lockRatio?: boolean
+}
+
 export interface HistorySnapshot {
   texts: TextItem[]
   bgColor: string
   bgGradient: BGGradient | null
-  bgImageUrl: string | null
 }
 
 export interface TemplateDef {
