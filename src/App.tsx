@@ -413,6 +413,7 @@ export default function App() {
           fillLinearGradientStartPoint={pts.start}
           fillLinearGradientEndPoint={pts.end}
           fillLinearGradientColorStops={[0, bgGradient.from, 1, bgGradient.to]}
+          listening={false}
         />
       )
     }
@@ -422,6 +423,7 @@ export default function App() {
         width={preset.width}
         height={preset.height}
         fill={bgColor}
+        listening={false}
       />
     )
   }
@@ -874,6 +876,12 @@ export default function App() {
                 scaleX={scale}
                 scaleY={scale}
                 onMouseDown={e => {
+                  if (e.target === e.target.getStage()) {
+                    setSelectedId(null)
+                    setSelectedImageId(null)
+                  }
+                }}
+                onTouchStart={e => {
                   if (e.target === e.target.getStage()) {
                     setSelectedId(null)
                     setSelectedImageId(null)
