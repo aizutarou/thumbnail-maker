@@ -1106,8 +1106,19 @@ export default function App() {
                       onTransformEnd={() => {
                         const node = textRefs.current.get(t.id)
                         if (!node) return
-                        const newWidth = Math.max(80, Math.abs(node.width() * node.scaleX()))
-                        updateText(t.id, { x: node.x(), y: node.y(), width: newWidth, rotation: node.rotation() })
+                        const scaleX = Math.abs(node.scaleX())
+                        const scaleY = Math.abs(node.scaleY())
+                        const cornerUsed = Math.abs(scaleY - 1) > 0.001
+                        // Corner anchor → update fontSize from scaleY
+                        const newFontSize = cornerUsed
+                          ? Math.min(200, Math.max(12, Math.round(t.fontSize * scaleY)))
+                          : t.fontSize
+                        // Width: corner on auto-text keeps auto; corner on fixed-text scales it;
+                        // middle anchor always sets fixed width
+                        const newWidth = cornerUsed
+                          ? (t.width > 0 ? Math.max(80, Math.round(t.width * scaleX)) : 0)
+                          : Math.max(80, Math.abs(node.width() * scaleX))
+                        updateText(t.id, { x: node.x(), y: node.y(), width: newWidth, fontSize: newFontSize, rotation: node.rotation() })
                         node.scaleX(1)
                         node.scaleY(1)
                       }}
@@ -1139,7 +1150,7 @@ export default function App() {
                   <Transformer
                     ref={textTransformerRef}
                     rotateEnabled={true}
-                    enabledAnchors={['middle-left', 'middle-right']}
+                    enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right']}
                     anchorSize={isMobile ? 20 : 8}
                     anchorCornerRadius={isMobile ? 10 : 0}
                     boundBoxFunc={(oldBox, newBox) => {
