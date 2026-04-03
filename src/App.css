@@ -297,6 +297,59 @@
   text-align: right;
 }
 
+/* ── Number input (next to sliders) ── */
+.num-input {
+  width: 52px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-family: inherit;
+  text-align: right;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #1e293b;
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+  /* Hide spin buttons */
+  -moz-appearance: textfield;
+}
+.num-input::-webkit-inner-spin-button,
+.num-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.num-input:focus { border-color: #6366f1; }
+
+/* ── Nudge buttons ── */
+.nudge-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.nudge-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.nudge-btn:hover  { background: #e0e7ff; color: #4f46e5; }
+.nudge-btn:active { background: #c7d2fe; }
+.nudge-btn-lg {
+  font-size: 11px;
+  color: #94a3b8;
+  border-style: dashed;
+}
+
 .gradient-controls {
   display: flex;
   flex-direction: column;
@@ -787,6 +840,9 @@
   .btn-download    { height: 48px; font-size: 15px; padding: 0 18px; }
   .btn-share       { height: 48px; padding: 0 14px; }
   .range           { height: 6px; }
+  .nudge-btn       { width: 40px; height: 40px; font-size: 16px; }
+  .nudge-btn-lg    { font-size: 12px; }
+  .num-input       { width: 56px; height: 36px; font-size: 13px; }
 
   /* Panel spacing */
   .panel-section { padding: 12px 14px; gap: 10px; }

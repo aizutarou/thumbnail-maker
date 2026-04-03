@@ -81,6 +81,8 @@ export default function App() {
   // Mobile-only tab navigation
   type MobileTab = 'bg' | 'images' | 'text'
   const [mobileTab, setMobileTab] = useState<MobileTab>('bg')
+  // Larger touch targets on mobile
+  const [isMobile] = useState(() => window.innerWidth < 768)
   // Force re-render when a new HTMLImageElement finishes loading
   const [, forceUpdate] = useState(0)
   const imagesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -218,6 +220,30 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [handleUndo, handleRedo])
+
+  // ── Keyboard arrow keys: nudge selected element ──
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      e.preventDefault()
+      const step = e.shiftKey ? 10 : 1
+      const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+      const dy = e.key === 'ArrowUp'   ? -step : e.key === 'ArrowDown'  ? step : 0
+      if (selectedId)      nudgeText(selectedId, dx, dy)
+      if (selectedImageId) nudgeImage(selectedImageId, dx, dy)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedId, selectedImageId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Nudge (no history — fine-tuning only) ──
+  const nudgeText = (id: string, dx: number, dy: number) => {
+    setTexts(prev => prev.map(t => t.id === id ? { ...t, x: t.x + dx, y: t.y + dy } : t))
+  }
+  const nudgeImage = (id: string, dx: number, dy: number) => {
+    setImages(prev => prev.map(img => img.id === id ? { ...img, x: img.x + dx, y: img.y + dy } : img))
+  }
 
   // ── Scale canvas to fit container ──
   const updateScale = useCallback(() => {
@@ -588,11 +614,34 @@ export default function App() {
                         <input
                           type="range"
                           className="range"
-                          min={0.1} max={1} step={0.05}
-                          value={img.opacity}
-                          onChange={e => updateImage(img.id, { opacity: Number(e.target.value) })}
+                          min={10} max={100} step={5}
+                          value={Math.round(img.opacity * 100)}
+                          onChange={e => updateImage(img.id, { opacity: Number(e.target.value) / 100 })}
                         />
-                        <span className="value-badge">{Math.round(img.opacity * 100)}%</span>
+                        <input
+                          type="number"
+                          className="num-input"
+                          min={10} max={100} step={5}
+                          value={Math.round(img.opacity * 100)}
+                          onChange={e => {
+                            const v = Math.min(100, Math.max(10, Number(e.target.value)))
+                            if (!isNaN(v)) updateImage(img.id, { opacity: v / 100 })
+                          }}
+                        />
+                      </div>
+                      {/* Nudge buttons */}
+                      <div className="control-row">
+                        <label>位置</label>
+                        <div className="nudge-group">
+                          <button className="nudge-btn" onClick={() => nudgeImage(img.id, 0, -1)}>↑</button>
+                          <button className="nudge-btn" onClick={() => nudgeImage(img.id, 0,  1)}>↓</button>
+                          <button className="nudge-btn" onClick={() => nudgeImage(img.id, -1, 0)}>←</button>
+                          <button className="nudge-btn" onClick={() => nudgeImage(img.id,  1, 0)}>→</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeImage(img.id, 0, -10)}>↑↑</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeImage(img.id, 0,  10)}>↓↓</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeImage(img.id, -10, 0)}>←←</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeImage(img.id,  10, 0)}>→→</button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -669,7 +718,16 @@ export default function App() {
                           value={t.fontSize}
                           onChange={e => updateText(t.id, { fontSize: Number(e.target.value) })}
                         />
-                        <span className="value-badge">{t.fontSize}px</span>
+                        <input
+                          type="number"
+                          className="num-input"
+                          min={12} max={200}
+                          value={t.fontSize}
+                          onChange={e => {
+                            const v = Math.min(200, Math.max(12, Number(e.target.value)))
+                            if (!isNaN(v)) updateText(t.id, { fontSize: v })
+                          }}
+                        />
                       </div>
 
                       <div className="control-row">
@@ -736,7 +794,16 @@ export default function App() {
                             value={t.shadowBlur}
                             onChange={e => updateText(t.id, { shadowBlur: Number(e.target.value) })}
                           />
-                          <span className="value-badge">{t.shadowBlur}</span>
+                          <input
+                            type="number"
+                            className="num-input"
+                            min={0} max={40}
+                            value={t.shadowBlur}
+                            onChange={e => {
+                              const v = Math.min(40, Math.max(0, Number(e.target.value)))
+                              if (!isNaN(v)) updateText(t.id, { shadowBlur: v })
+                            }}
+                          />
                         </div>
                       )}
 
@@ -756,7 +823,31 @@ export default function App() {
                           value={t.outlineWidth}
                           onChange={e => updateText(t.id, { outlineWidth: Number(e.target.value) })}
                         />
-                        <span className="value-badge">{t.outlineWidth}px</span>
+                        <input
+                          type="number"
+                          className="num-input"
+                          min={0} max={20}
+                          value={t.outlineWidth}
+                          onChange={e => {
+                            const v = Math.min(20, Math.max(0, Number(e.target.value)))
+                            if (!isNaN(v)) updateText(t.id, { outlineWidth: v })
+                          }}
+                        />
+                      </div>
+
+                      {/* Nudge buttons */}
+                      <div className="control-row">
+                        <label>位置</label>
+                        <div className="nudge-group">
+                          <button className="nudge-btn" onClick={() => nudgeText(t.id, 0, -1)}>↑</button>
+                          <button className="nudge-btn" onClick={() => nudgeText(t.id, 0,  1)}>↓</button>
+                          <button className="nudge-btn" onClick={() => nudgeText(t.id, -1, 0)}>←</button>
+                          <button className="nudge-btn" onClick={() => nudgeText(t.id,  1, 0)}>→</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeText(t.id, 0, -10)}>↑↑</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeText(t.id, 0,  10)}>↓↓</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeText(t.id, -10, 0)}>←←</button>
+                          <button className="nudge-btn nudge-btn-lg" onClick={() => nudgeText(t.id,  10, 0)}>→→</button>
+                        </div>
                       </div>
 
                     </div>
@@ -880,6 +971,8 @@ export default function App() {
                     ref={transformerRef}
                     rotateEnabled={true}
                     keepRatio={false}
+                    anchorSize={isMobile ? 20 : 8}
+                    anchorCornerRadius={isMobile ? 10 : 0}
                     boundBoxFunc={(oldBox, newBox) => {
                       if (newBox.width < 20 || newBox.height < 20) return oldBox
                       return newBox
@@ -890,6 +983,8 @@ export default function App() {
                     ref={textTransformerRef}
                     rotateEnabled={true}
                     enabledAnchors={['middle-left', 'middle-right']}
+                    anchorSize={isMobile ? 20 : 8}
+                    anchorCornerRadius={isMobile ? 10 : 0}
                     boundBoxFunc={(oldBox, newBox) => {
                       if (newBox.width < 80) return oldBox
                       return newBox
