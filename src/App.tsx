@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Konva from 'konva'
 import { Stage, Layer, Rect, Text, Image as KonvaImage, Transformer } from 'react-konva'
-import { getGradientPoints } from './templates'
 import type { TextItem, ImageItem, SizePreset, BGGradient, GradientAngle, HistorySnapshot } from './types'
 import { loadSavedState, saveState, clearSavedState, formatTimeAgo } from './storage'
 import type { SavedState } from './storage'
@@ -10,15 +9,24 @@ import './App.css'
 
 // ── Constants ──────────────────────────────────────────────────────
 const SIZE_PRESETS: SizePreset[] = [
-  { id: 'ogp',     name: 'OGP',       width: 1200, height: 630  },
-  { id: 'youtube', name: 'YouTube',   width: 1280, height: 720  },
-  { id: 'twitter', name: 'X/Twitter', width: 1200, height: 675  },
-  { id: 'note',    name: 'note',      width: 1280, height: 670  },
-  { id: 'square',  name: 'Instagram', width: 1080, height: 1080 },
+  { id: 'ogp',     name: 'OGP',          width: 1200, height: 630  },
+  { id: 'youtube', name: 'YouTube',      width: 1280, height: 720  },
+  { id: 'twitter', name: 'X/Twitter',   width: 1200, height: 675  },
+  { id: 'note',    name: 'note',         width: 1280, height: 670  },
+  { id: 'square',  name: 'Instagram',   width: 1080, height: 1080 },
+  { id: 'story',   name: 'Story/Shorts', width: 1080, height: 1920 },
 ]
 
 const FONT_FAMILIES = [
+  // 日本語
   'Noto Sans JP',
+  'M PLUS Rounded 1c',
+  'Dela Gothic One',
+  'Rampart One',
+  'DotGothic16',
+  'Zen Maru Gothic',
+  'Kosugi Maru',
+  // 欧文
   'serif',
   'Arial',
   'Georgia',
@@ -32,6 +40,16 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
   { value: 'to-bottom',       label: '縦（↓）'   },
   { value: 'to-bottom-left',  label: '斜め（↙）' },
 ]
+
+function getGradientPoints(angle: BGGradient['angle'], w: number, h: number) {
+  switch (angle) {
+    case 'to-right':        return { start: { x: 0, y: 0 }, end: { x: w, y: 0 } }
+    case 'to-bottom':       return { start: { x: 0, y: 0 }, end: { x: 0, y: h } }
+    case 'to-bottom-left':  return { start: { x: w, y: 0 }, end: { x: 0, y: h } }
+    case 'to-bottom-right':
+    default:                return { start: { x: 0, y: 0 }, end: { x: w, y: h } }
+  }
+}
 
 const BG_COLOR_PRESETS = [
   '#000000', '#ffffff', '#1a1a2e', '#0f172a',
@@ -1182,7 +1200,7 @@ export default function App() {
                 </Layer>
               </Stage>
             </div>
-            <p className="canvas-hint">テキスト・画像はドラッグで移動 • 画像は角をドラッグでリサイズ</p>
+            <p className="canvas-hint">ドラッグで移動 • 画像の角でリサイズ • テキストの角でフォントサイズ変更 • Delete で削除 • Ctrl+V で画像貼り付け</p>
           </main>
 
           {/* ── Export Bar ── */}
@@ -1221,14 +1239,14 @@ export default function App() {
                       <span className="size-preset-dim">{p.width}×{p.height}</span>
                     </button>
                   ))}
-                </div>
+      </div>
                 <div className="export-actions">
                   <button className="btn-download" onClick={handleDownload}>
                     ⬇ PNG でダウンロード
                   </button>
                   <button className="btn-share" onClick={handleShare}>
                     𝕏 でシェアする
-                  </button>
+        </button>
                 </div>
               </>
             )}
