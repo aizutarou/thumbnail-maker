@@ -431,6 +431,27 @@ export default function App() {
     reader.readAsDataURL(file)
   }
 
+  // ── Clipboard paste (Ctrl+V / Cmd+V) → add image ──
+  const addImageRef = useRef<(file: File) => void>(addImage)
+  useEffect(() => { addImageRef.current = addImage })
+
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+      for (const item of Array.from(items)) {
+        if (!item.type.startsWith('image/')) continue
+        const file = item.getAsFile()
+        if (!file) continue
+        e.preventDefault()
+        addImageRef.current(file)
+        break
+      }
+    }
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [])
+
   const removeImage = (id: string) => {
     loadedImagesRef.current.delete(id)
     imageRefs.current.delete(id)
