@@ -1006,26 +1006,51 @@ export default function App() {
 
           {/* ── Export Bar ── */}
           <div className="export-bar">
-            <div className="size-presets">
-              {SIZE_PRESETS.map(p => (
-                <button
-                  key={p.id}
-                  className={`size-preset-btn ${preset.id === p.id ? 'active' : ''}`}
-                  onClick={() => handlePresetChange(p.id)}
+            {/* Desktop: preset buttons / Mobile: compact select */}
+            {isMobile ? (
+              <div className="export-bar-mobile">
+                <select
+                  className="select export-size-select"
+                  value={preset.id}
+                  onChange={e => handlePresetChange(e.target.value)}
                 >
-                  <span className="size-preset-name">{p.name.split(/\s+/)[0]}</span>
-                  <span className="size-preset-dim">{p.width}×{p.height}</span>
+                  {SIZE_PRESETS.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}　{p.width}×{p.height}
+                    </option>
+                  ))}
+                </select>
+                <button className="btn-download btn-download-sm" onClick={handleDownload}>
+                  ⬇ ダウンロード
                 </button>
-              ))}
-            </div>
-            <div className="export-actions">
-              <button className="btn-download" onClick={handleDownload}>
-                ⬇ PNG でダウンロード
-              </button>
-              <button className="btn-share" onClick={handleShare}>
-                𝕏 でシェアする
-              </button>
-            </div>
+                <button className="btn-share btn-share-sm" onClick={handleShare}>
+                  𝕏
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="size-presets">
+                  {SIZE_PRESETS.map(p => (
+                    <button
+                      key={p.id}
+                      className={`size-preset-btn ${preset.id === p.id ? 'active' : ''}`}
+                      onClick={() => handlePresetChange(p.id)}
+                    >
+                      <span className="size-preset-name">{p.name.split(/\s+/)[0]}</span>
+                      <span className="size-preset-dim">{p.width}×{p.height}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="export-actions">
+                  <button className="btn-download" onClick={handleDownload}>
+                    ⬇ PNG でダウンロード
+                  </button>
+                  <button className="btn-share" onClick={handleShare}>
+                    𝕏 でシェアする
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
         </div>{/* /canvas-column */}

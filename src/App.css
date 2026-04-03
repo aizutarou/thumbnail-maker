@@ -776,18 +776,41 @@
 
   /* Canvas preview area */
   .preview-area {
-    flex: 0 0 200px;
-    min-height: 120px;
+    flex: 0 0 260px;
+    min-height: 140px;
     padding: 10px 10px 6px;
   }
   .canvas-hint { display: none; }
 
-  /* Export bar — compact on mobile */
-  .export-bar { padding: 8px 12px; gap: 8px; }
-  .size-presets { gap: 4px; }
-  .size-preset-btn { padding: 4px 8px; }
-  .size-preset-name { font-size: 11px; }
-  .size-preset-dim  { font-size: 9px; }
+  /* Export bar — single compact row on mobile */
+  .export-bar { padding: 6px 10px; gap: 0; }
+  .export-bar-mobile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .export-size-select {
+    flex: 1;
+    height: 36px;
+    font-size: 12px;
+    min-width: 0;
+  }
+  .btn-download-sm {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    box-shadow: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-share-sm {
+    height: 36px;
+    width: 40px;
+    padding: 0;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
 
   /* Control panel — fills remaining space, scrollable */
   .control-panel {
