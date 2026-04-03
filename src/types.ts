@@ -59,6 +59,7 @@ export interface ImageItem {
   height: number
   opacity: number
   rotation: number
+  lockRatio?: boolean
 }
 
 export interface HistorySnapshot {

@@ -33,6 +33,63 @@ const GRADIENT_ANGLES: { value: GradientAngle; label: string }[] = [
   { value: 'to-bottom-left',  label: '斜め（↙）' },
 ]
 
+const BG_COLOR_PRESETS = [
+  '#000000', '#ffffff', '#1a1a2e', '#0f172a',
+  '#7c3aed', '#db2777', '#ea580c', '#f59e0b',
+  '#16a34a', '#0284c7', '#374151', '#94a3b8',
+]
+
+// ── FontSelect ─────────────────────────────────────────────────────
+interface FontSelectProps {
+  value: string
+  onChange: (font: string) => void
+  fonts: string[]
+}
+
+function FontSelect({ value, onChange, fonts }: FontSelectProps) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={ref} className="font-select">
+      <button
+        type="button"
+        className={`font-select-btn ${open ? 'open' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        title={value}
+      >
+        <span style={{ fontFamily: value }}>{value}</span>
+        <span className="font-select-arrow">{open ? '▴' : '▾'}</span>
+      </button>
+      {open && (
+        <div className="font-select-dropdown">
+          {fonts.map(f => (
+            <div
+              key={f}
+              className={`font-select-option ${f === value ? 'active' : ''}`}
+              style={{ fontFamily: f }}
+              onClick={() => { onChange(f); setOpen(false) }}
+            >
+              {f}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function makeText(preset: SizePreset, overrides: Partial<TextItem> = {}): TextItem {
   return {
     id: `${Date.now()}-${Math.random()}`,
@@ -83,6 +140,8 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState<MobileTab>('bg')
   // Larger touch targets on mobile
   const [isMobile] = useState(() => window.innerWidth < 768)
+  // Shift key held — enables keepRatio on image transformer
+  const [shiftHeld, setShiftHeld] = useState(false)
   // Force re-render when a new HTMLImageElement finishes loading
   const [, forceUpdate] = useState(0)
   const imagesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -248,6 +307,18 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [selectedId, selectedImageId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Track Shift key for keepRatio ──
+  useEffect(() => {
+    const onDown = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(true)  }
+    const onUp   = (e: KeyboardEvent) => { if (e.key === 'Shift') setShiftHeld(false) }
+    window.addEventListener('keydown', onDown)
+    window.addEventListener('keyup',   onUp)
+    return () => {
+      window.removeEventListener('keydown', onDown)
+      window.removeEventListener('keyup',   onUp)
+    }
+  }, [])
 
   // ── Nudge (no history — fine-tuning only) ──
   const nudgeText = (id: string, dx: number, dy: number) => {
@@ -552,16 +623,30 @@ export default function App() {
             </div>
 
             {!bgGradient && (
-              <div className="control-row">
-                <label>背景色</label>
-                <input
-                  type="color"
-                  className="color-input"
-                  value={bgColor}
-                  onChange={e => setBgColor(e.target.value)}
-                />
-                <span className="color-value">{bgColor}</span>
-              </div>
+              <>
+                <div className="control-row">
+                  <label>背景色</label>
+                  <input
+                    type="color"
+                    className="color-input"
+                    value={bgColor}
+                    onChange={e => setBgColor(e.target.value)}
+                  />
+                  <span className="color-value">{bgColor}</span>
+                </div>
+                <div className="color-presets">
+                  {BG_COLOR_PRESETS.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`color-preset-swatch ${bgColor === c ? 'active' : ''}`}
+                      style={{ background: c }}
+                      onClick={() => setBgColor(c)}
+                      title={c}
+                    />
+                  ))}
+                </div>
+              </>
             )}
 
             {bgGradient && (
@@ -668,6 +753,19 @@ export default function App() {
                         ⛶ 背景に引き延ばす
                       </button>
                       <div className="control-row">
+                        <label>縦横比</label>
+                        <button
+                          className={`btn-toggle ${img.lockRatio ? 'active' : ''}`}
+                          onClick={() => updateImage(img.id, { lockRatio: !img.lockRatio })}
+                          title="縦横比を固定してリサイズ（PCではShiftキーでも固定）"
+                        >
+                          {img.lockRatio ? '🔒 固定中' : '固定する'}
+                        </button>
+                        {!isMobile && (
+                          <span className="color-value">Shift でも固定</span>
+                        )}
+                      </div>
+                      <div className="control-row">
                         <label>不透明度</label>
                         <input
                           type="range"
@@ -768,15 +866,11 @@ export default function App() {
 
                       <div className="control-row">
                         <label>フォント</label>
-                        <select
-                          className="select select-sm"
+                        <FontSelect
                           value={t.fontFamily}
-                          onChange={e => updateText(t.id, { fontFamily: e.target.value })}
-                        >
-                          {FONT_FAMILIES.map(f => (
-                            <option key={f} value={f}>{f}</option>
-                          ))}
-                        </select>
+                          onChange={font => updateText(t.id, { fontFamily: font })}
+                          fonts={FONT_FAMILIES}
+                        />
                       </div>
 
                       <div className="control-row">
@@ -1046,7 +1140,7 @@ export default function App() {
                   <Transformer
                     ref={transformerRef}
                     rotateEnabled={true}
-                    keepRatio={false}
+                    keepRatio={shiftHeld || (images.find(i => i.id === selectedImageId)?.lockRatio ?? false)}
                     anchorSize={isMobile ? 20 : 8}
                     anchorCornerRadius={isMobile ? 10 : 0}
                     boundBoxFunc={(oldBox, newBox) => {
